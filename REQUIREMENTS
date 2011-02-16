@@ -1,0 +1,33 @@
+Login functionality - V 0.1
+* A user should be able to login to the site using open-id 
+
+Public group functionality - V 0.2
+* There is one public group, everybody can see these pajas points, even those who aren't logged in
+
+Adding points - V 0.3
+* A user should be able to add a pajas point
+* The pajas point should be directed to another user or any arbitrary item, person that is not a user
+* The pajas point should contain a description of why the pajas point has been rewarded
+
+Basic version - V 1.0
+* There should be a list of all pajas points that has been handed out
+* There should be a list of all users where the list is sorted according to the pajas points, the one with most pajas points should be at the top
+
+Extended basic support V 1.1
+* A user can remove pajas points that have been put on them
+* A super user has access to everything and can administrate any group 
+* A user can flag if a pajas point is offending to him/her
+* A flagged pajas point is removed from any lists until it can be reviewed by a super user
+
+Group support - V 1.2
+* Users can join groups
+* Any user can create a group, that user will become the administrator of the group
+* An administrator of the group can invite other users to the group
+* An administrator of a group can accept or deny users who wants to join the group
+* Pajas points can be handed out to the users of a group
+* Pajas points handed out in a group context can be set to be visible only to users in a group, or to all users
+* A group has some configurable settings, you can configure if pajas points should be visible to all or only within group
+
+Extended group functionality -  V 1.3 
+* An administrator can appoint new administrators of the group
+* An administrator can remove a group
