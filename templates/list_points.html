@@ -1,0 +1,12 @@
+{% extends "base.html"%}
+
+{% block body %}
+<table>
+{% for point in points %}
+<tr>
+  <td>{{point.issuer_id}}</td><td>{{point.pajas_id}}</td>
+  <td>{{point.description}}</td>
+</tr>
+{% endfor %}
+</table>
+{% endblock %}

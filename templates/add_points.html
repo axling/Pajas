@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Add Pajas Points{% endblock %}
+{% block body %}
+<form method="post" action="/add_point">
+  <table>
+    <tr><th>Description</th><th>Friend</th><th></th></tr>
+    <tr>
+      <td>
+	<textarea rows="4" cols="30" name="description"></textarea>
+      </td>
+      <td> 
+	<input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
+	<input type="text" name="friend" />
+      </td>
+      <td>
+	<input type="submit" value="Submit" />
+      </td>
+    </tr>
+  </table>
+</form>
+{% endblock %}
