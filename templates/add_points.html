@@ -1,21 +1,26 @@
 {% extends "base.html" %}
 {% block title %}Add Pajas Points{% endblock %}
+{% block scripts %}
+<script src="/searchFriends.js"></script>
+{% endblock %}
 {% block body %}
-<form method="post" action="/add_point">
-  <table>
-    <tr><th>Description</th><th>Friend</th><th></th></tr>
-    <tr>
-      <td>
-	<textarea rows="4" cols="30" name="description"></textarea>
-      </td>
-      <td> 
-	<input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
-	<input type="text" name="friend" />
-      </td>
-      <td>
-	<input type="submit" value="Submit" />
-      </td>
-    </tr>
-  </table>
+<div class="ui-widget">
+<form class="inline" method="post" action="/add_point">
+  <div class="grid_11 prefix_1">
+    <div class="grid_3 alpha">Description</div>
+    <div class="grid_1 omega">Friend</div>
+  </div>
+  <div class="clear"></div>
+  <div class="grid_11 prefix_1">
+    <textarea class="grid_3 alpha" rows="2" cols="30" name="description"></textarea>
+    <div class="grid_3">
+      <select id="combobox" name="friend">
+      </select>
+    </div>
+    <input class="grid_1 omega" type="submit" value="Submit" />
+    <input type="hidden" name="_csrf_token" value="{{ csrf_token }}" />
+  </div>
+  <div class="clear"></div>
 </form>
+</div>
 {% endblock %}

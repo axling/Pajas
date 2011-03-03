@@ -7,36 +7,56 @@
       {% block title %}Welcome{% endblock %} &mdash; Pajas!
     </title>
     <meta name="description" content="Give Pajas Points to your Friends">
-    <link type="text/css" rel="stylesheet" href="/awesome-buttons.css">
-    <link type="text/css" rel="stylesheet" href="/main.css">
+    <link rel="stylesheet" type="text/css" media="all" href="/reset.css" />
+    <link rel="stylesheet" type="text/css" media="all" href="/text.css" />
+    <link rel="stylesheet" type="text/css" media="all" href="/960.css" />
+    <link rel="stylesheet" type="text/css" media="all" href="/main.css" />
+    <link rel="stylesheet" type="text/css" media="all" href="/css/ui-lightness/jquery-ui-1.8.9.custom.css" />
+    <script src="/jquery-1.5.min.js"></script>
+    <script src="/jquery-ui-1.8.9.custom.min.js"></script>
+    {% block scripts %}{% endblock %}
+    <style> 
+      .ui-button { margin-left: -1px; }
+      .ui-button-icon-only .ui-button-text { padding: 0.35em; } 
+      .ui-autocomplete-input { margin: 0; padding: 0.48em 0 0.47em 0.45em; }
+    </style> 
   </head>
   <body>
-    <div id="doc">
-      <div class="hd">
-        {% if logged_in_user %}
-          <div id="user-info">
-            <div class="info">
-              <a class="name" href="/user/{{ logged_in_user.user_id }}">
-                {{ logged_in_user.name }}
+    <div class="container_12">
+      <div class="grid_2 prefix_1">
+	<h2><a href="/">Pajas!</a></h2>
+      </div>
+      <div class="grid_2 prefix_4">
+	  {% if logged_in_user %}
+	  <div>
+	    <div>
+              <a href="/user_page/{{ logged_in_user.user_id }}">
+		{{ logged_in_user.name }}
               </a>
-              <a class="logout" onclick="FB.logout()">Logout</a>
-            </div>
+              
+	    </div>
             <img width="50" height="50" src="{{ logged_in_user.picture }}">
           </div>
-        {% endif %}
-        <a class="logo" href="/">Pajas!</a>
+	  <a onclick="FB.logout()">Logout</a>
+	  {% endif %}	
       </div>
-
-      {% if message %}
-        <div class="message {{ message.type }}">{{ message.content|safe }}</div>
-      {% endif %}
-
-      <div class="bd">
-        {% block body %}{% endblock %}
-      </div><!-- .bd -->
+      <div class="clear"></div>
+      <div class="grid_11 prefix_1 menu">
+	{% block navbar %}
+	<a href="/list_points">[Top List]</a>
+	<a href="/friend_list">[Pajas Friends]</a>
+	<a href="/user_page/{{logged_in_user.user_id}}">[Me]</a>
+	<a href="/add_point">[Add Point]</a>
+        {% endblock %}
+      </div>
+      <div class="clear"></div>
       
+      {% if message %}
+      <div class="message {{ message.type }}">{{ message.content|safe }}</div>
+      {% endif %}
+      {% block body %}
+      {% endblock %}
     </div>
-
     <script src="/main.js"></script>
     <div id="fb-root"></div>
     <script>
@@ -47,18 +67,6 @@
         e.src = document.location.protocol + '//connect.facebook.net/en_US/all.js';
         document.getElementById('fb-root').appendChild(e);
       }());
-
-      {# async loading of google analytics #}
-      var _gaq = _gaq || [];
-      _gaq.push(['_setAccount', 'UA-19854556-1']);
-      _gaq.push(['_trackPageview']);
-
-      (function() {
-        var ga = document.createElement('script');
-        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-        var s = document.getElementsByTagName('script')[0];
-        s.parentNode.insertBefore(ga, s);
-      })();
     </script>
   </body>
 </html>

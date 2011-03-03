@@ -1,0 +1,55 @@
+{% extends "base.html"%}
+
+{% block scripts %}
+<script src="/get_fb_user.js"></script>
+{% endblock %}
+
+{% block body %}
+<h3 class="grid_11 prefix_1">Add Another Pajas Point for 
+  <div class="fb_uid_name" id="{{ user }}"></div></h3>
+<form class="inline" method="post" action="/user_page/{{user}}">
+  <div class="grid_11 prefix_1">
+    <div class="grid_3 alpha">Description</div>
+  </div>
+  <div class="clear"></div>
+  <div class="grid_11 prefix_1">
+    <textarea class="grid_3 alpha" rows="2" cols="30" name="description"></textarea>
+    <input class="grid_1 omega" type="submit" value="Submit" />
+    <input type="hidden" name="_csrf_token" value="{{ csrf_token }}" />
+  </div>
+  <div class="clear"></div>
+</form>
+{% for point in points %}
+{% if forloop.first %}
+<h3 class="grid_11 prefix_1">Pajaspoints for
+<div class="fb_uid_name" id="{{ user }}"></div></h3>
+<div class="clear"></div>
+<div class="grid_11 prefix_1">
+  <div class="grid_3 alpha"><i>Reason</i></div>
+  <div class="grid_7 omega"><i>Given By</i></div>
+</div>
+<div class="clear"></div>
+{% endif %}
+<div class="grid_11 prefix_1 point">
+  <div class="grid_3 alpha">{{ point.description }}</div>
+  <div class="fb_uid grid_7 omega" id="{{ point.issuer_id }}"></div>
+</div>
+{% endfor %}
+
+{% for point in iss_points %}
+{% if forloop.first %}
+<h3 class="grid_11 prefix_1">Pajaspoints given by
+<div class="fb_uid_name" id="{{ user }}"></div></h3>
+<div class="clear"></div>
+<div class="grid_11 prefix_1">
+  <div class="grid_3 alpha"><i>Reason</i></div>
+  <div class="grid_7 omega"><i>Given to</i></div>
+</div>
+<div class="clear"></div>
+{% endif %}
+<div class="grid_11 prefix_1 point">
+  <div class="grid_3 alpha">{{ point.description }}</div>
+  <div class="fb_uid grid_7 omega" id="{{point.pajas_id}}"></div>
+</div>
+{% endfor %}
+{% endblock %}

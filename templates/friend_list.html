@@ -1,0 +1,15 @@
+{% extends "base.html"%}
+
+{% block scripts %}
+<script src="/get_fb_user.js"></script>
+{% endblock %}
+
+{% block body %}
+{% for uid, last_point, nr_points in friendlist %}
+<div class="grid_11 prefix_1 point">
+  <div class="fb_uid grid_1 alpha" id="{{uid}}"></div>
+  <div class="grid_2">{{ last_point.description }}</div>
+  <div class="grid_7 omega">{{ nr_points }}</div>
+</div>
+{% endfor %}
+{% endblock %}

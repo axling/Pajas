@@ -1,10 +1,15 @@
 {% extends "base.html"%}
 
+{% block scripts %}
+<script src="/get_fb_user.js"></script>
+{% endblock %}
+
 {% block body %}
 <table>
 {% for point in points %}
 <tr>
-  <td>{{point.issuer_id}}</td><td>{{point.pajas_id}}</td>
+  <td><div class="fb_uid" id="{{point.issuer_id}}"></div></td>
+  <td><div class="fb_uid" id="{{point.pajas_id}}"></div></td>
   <td>{{point.description}}</td>
 </tr>
 {% endfor %}

@@ -61,28 +61,11 @@ def get_picture(dic, index):
     """Django template filter to render picture"""
     return dic[index].picture
 
-
-def select_random(lst, limit):
-    """Select a limited set of random non Falsy values from a list"""
-    final = []
-    size = len(lst)
-    while limit and size:
-        index = randrange(min(limit, size))
-        size = size - 1
-        elem = lst[index]
-        lst[index] = lst[size]
-        if elem:
-            limit = limit - 1
-            final.append(elem)
-    return final
-
-
 class User(db.Model):
     user_id = db.StringProperty(required=True)
     access_token = db.StringProperty(required=True)
     name = db.StringProperty(required=True)
     picture = db.StringProperty(required=True)
-    email = db.StringProperty()
     friends = db.StringListProperty()
     dirty = db.BooleanProperty()
 
@@ -92,7 +75,6 @@ class User(db.Model):
             {u'fields': u'picture,friends', u'access_token': self.access_token})
         self.dirty = False
         self.name = me[u'name']
-        self.email = me.get(u'email')
         self.picture = me[u'picture']
         self.friends = [user[u'id'] for user in me[u'friends'][u'data']]
         return self.put()
@@ -102,6 +84,7 @@ class Point(db.Model):
     issuer_id = db.StringProperty(required=True)
     pajas_id = db.StringProperty(required=True)
     description = db.StringProperty(required=True)
+    submit_time = db.DateTimeProperty(auto_now_add=True)
     
 
 class FacebookApiError(Exception):
@@ -287,13 +270,14 @@ class BaseHandler(webapp.RequestHandler):
                     facebook.access_token = user.access_token
 
             if not user and facebook.access_token:
-                me = facebook.api(u'/me', {u'fields': u'picture,friends'})
+                me = facebook.api(u'/me', {u'fields': u'name,picture,friends'})
                 try:
                     friends = [user[u'id'] for user in me[u'friends'][u'data']]
                     user = User(key_name=facebook.user_id,
-                        user_id=facebook.user_id, friends=friends,
-                        access_token=facebook.access_token, name=me[u'name'],
-                        email=me.get(u'email'), picture=me[u'picture'])
+                                user_id=facebook.user_id, friends=friends,
+                                access_token=facebook.access_token, 
+                                name=me[u'name'],
+                                picture=me[u'picture'])
                     user.put()
                 except KeyError, ex:
                     pass # ignore if can't get the minimum fields
@@ -333,6 +317,44 @@ def user_required(fn):
         handler.redirect(u'/')
     return wrapper
 
+class UserPage(BaseHandler):
+    def get(self, uid):
+        if (uid in self.user.friends) or uid == self.user.user_id:
+            rec_points = Point.all().filter("pajas_id =", 
+                                            uid).order("-submit_time")
+            issued_points = Point.all().filter("issuer_id =", 
+                                               uid).order("-submit_time")
+            self.render(u'user_page', points = rec_points, 
+                        user_name=self.user.name, iss_points = issued_points, 
+                        user=uid)
+    def post(self, uid):
+        if uid:
+            description = self.request.POST[u'description']
+            point = Point(issuer_id = self.user.user_id, pajas_id = uid,
+                          description = description)
+            point.put()
+            self.redirect(u'/user_page/' + uid)
+        else:
+            self.redirect(u'/user_page/' + uid)
+
+class FriendListHandler(BaseHandler):
+    def get(self):
+        if self.user:
+            friendpoints = []
+            for friend in self.user.friends:
+                points = Point.all().filter("pajas_id = ", 
+                                              friend).order("-submit_time")
+                nr_of_points = points.count()
+                if nr_of_points > 0:
+                    last_point = points[0]
+                    friendpoints.append((friend, last_point, nr_of_points))
+            if friendpoints:
+                friendpoints = sorted(friendpoints, key=lambda k: k[2], 
+                                      reverse=True)
+            self.render(u'friend_list', friendlist=friendpoints)
+        else:
+            self.redirect(u'/')
+
 class ListPointsHandler(BaseHandler):
     def get(self):
         if self.user:
@@ -346,14 +368,14 @@ class AddPointsHandler(BaseHandler):
         if self.user:
             self.render(u'add_points', friends = self.user.friends)
         else:
-            self.render(u'add_points')
+            self.redirect(u'/')
     def post(self):
         description = self.request.POST[u'description']
         friend = self.request.POST[u'friend']
-        point = Point(issuer_id = "me", pajas_id = friend, 
+        point = Point(issuer_id = self.user.user_id, pajas_id = friend, 
                       description = description)
         point.put()
-        self.redirect(u'/list_points')
+        self.redirect(u'/friend_list')
         
 
 class MainHandler(BaseHandler):
@@ -367,8 +389,9 @@ def main():
     routes = [
         (r'/', MainHandler),
         (r'/add_point', AddPointsHandler),
-        (r'/list_points', ListPointsHandler)
-        
+        (r'/list_points', ListPointsHandler),
+        (r'/friend_list', FriendListHandler),
+        (r'/user_page/(.*)', UserPage)
         ]
     application = webapp.WSGIApplication(routes,
         debug=os.environ.get('SERVER_SOFTWARE', '').startswith('Dev'))
