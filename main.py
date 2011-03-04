@@ -31,6 +31,7 @@ from google.appengine.ext.webapp import util, template
 from google.appengine.runtime import DeadlineExceededError
 from random import randrange
 from uuid import uuid4
+from operator import itemgetter
 import Cookie
 import base64
 import cgi
@@ -358,8 +359,16 @@ class FriendListHandler(BaseHandler):
 class ListPointsHandler(BaseHandler):
     def get(self):
         if self.user:
+            summary = {}
             the_points = Point.all()
-            self.render(u'list_points', points=the_points)
+            for point in the_points:
+                if(point.pajas_id in summary):
+                    summary[point.pajas_id] += 1
+                else:
+                    summary[point.pajas_id] = 1
+            summary = sorted(summary.iteritems(), key=itemgetter(1), 
+                             reverse=True)
+            self.render(u'list_points', summary=summary, points=the_points)
         else:
             self.redirect(u'/')
 

@@ -5,13 +5,14 @@
 {% endblock %}
 
 {% block body %}
-<table>
-{% for point in points %}
-<tr>
-  <td><div class="fb_uid" id="{{point.issuer_id}}"></div></td>
-  <td><div class="fb_uid" id="{{point.pajas_id}}"></div></td>
-  <td>{{point.description}}</td>
-</tr>
+{% for uid, count in summary %}
+{% if forloop.first %}
+<h3 class="grid_11 prefix_1">Top List</h3>
+<div class="clear"></div>
+{% endif %}
+<div class="grid_11 prefix_1">
+  <div class="grid_2 alpha fb_uid" id="{{uid}}"></div>
+  <div class="grid_8 omega">{{count}}</div>
+</div>
 {% endfor %}
-</table>
 {% endblock %}
