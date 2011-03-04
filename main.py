@@ -330,11 +330,17 @@ class UserPage(BaseHandler):
                         user=uid)
     def post(self, uid):
         if uid:
-            description = self.request.POST[u'description']
-            point = Point(issuer_id = self.user.user_id, pajas_id = uid,
-                          description = description)
-            point.put()
-            self.redirect(u'/user_page/' + uid)
+            if u'point_tag' in self.request.POST:
+                key = self.request.POST[u'point_tag']
+                the_point = Point.get(key)
+                the_point.delete()
+                self.redirect(u'/user_page/' + uid)
+            else:
+                description = self.request.POST[u'description']
+                point = Point(issuer_id = self.user.user_id, pajas_id = uid,
+                              description = description)
+                point.put()
+                self.redirect(u'/user_page/' + uid)
         else:
             self.redirect(u'/user_page/' + uid)
 
@@ -390,7 +396,7 @@ class AddPointsHandler(BaseHandler):
 class MainHandler(BaseHandler):
     def get(self):
         if self.user:
-            self.redirect(u'/add_point')
+            self.redirect(u'/user_page/' + self.user.user_id)
         else:
             self.render(u'main')
 

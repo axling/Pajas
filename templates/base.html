@@ -23,30 +23,17 @@
   </head>
   <body>
     <div class="container_12">
-      <div class="grid_2 prefix_1">
-	<h2><a href="/">Pajas!</a></h2>
-      </div>
-      <div class="grid_2 prefix_4">
-	  {% if logged_in_user %}
-	  <div>
-	    <div>
-              <a href="/user_page/{{ logged_in_user.user_id }}">
-		{{ logged_in_user.name }}
-              </a>
-              
-	    </div>
-            <img width="50" height="50" src="{{ logged_in_user.picture }}">
-          </div>
-	  <a onclick="FB.logout()">Logout</a>
-	  {% endif %}	
-      </div>
+      <div class="grid_4 prefix_1 suffix_7">
+	<a href="/"><img src="/pajas_logo.png" /></a>
+      </div>      
       <div class="clear"></div>
-      <div class="grid_11 prefix_1 menu">
+      <div class="grid_6 prefix_1 suffix_5 menu">
 	{% block navbar %}
 	<a href="/list_points">[Top List]</a>
 	<a href="/friend_list">[Pajas Friends]</a>
 	<a href="/user_page/{{logged_in_user.user_id}}">[Me]</a>
 	<a href="/add_point">[Add Point]</a>
+	<a class="logout" onclick="FB.logout()">[Logout]</a>
         {% endblock %}
       </div>
       <div class="clear"></div>

@@ -5,51 +5,96 @@
 {% endblock %}
 
 {% block body %}
-<h3 class="grid_11 prefix_1">Add Another Pajas Point for 
+<h3 class="grid_6 prefix_1 suffix_5">Add Another Pajas Point for 
   <div class="fb_uid_name" id="{{ user }}"></div></h3>
-<form class="inline" method="post" action="/user_page/{{user}}">
-  <div class="grid_11 prefix_1">
-    <div class="grid_3 alpha">Description</div>
-  </div>
-  <div class="clear"></div>
-  <div class="grid_11 prefix_1">
+<div class="clear"></div>
+
+<div class="grid_6 prefix_1 suffix_5">Description</div>
+<div class="clear"></div>
+<div class="grid_6 prefix_1 suffix_5">
+  <form class="inline" method="post" action="/user_page/{{user}}">
     <textarea class="grid_3 alpha" rows="2" cols="30" name="description"></textarea>
     <input class="grid_1 omega" type="submit" value="Submit" />
     <input type="hidden" name="_csrf_token" value="{{ csrf_token }}" />
-  </div>
-  <div class="clear"></div>
-</form>
+  </form>
+</div>
+<div class="clear"></div>
+  
 {% for point in points %}
 {% if forloop.first %}
-<h3 class="grid_11 prefix_1">Pajaspoints for
-<div class="fb_uid_name" id="{{ user }}"></div></h3>
+<h3 class="grid_6 prefix_1 suffix_5">Pajaspoints for
+  <div class="fb_uid_name" id="{{ user }}"></div></h3>
 <div class="clear"></div>
-<div class="grid_11 prefix_1">
+<div class="grid_6 prefix_1 suffix_5">
   <div class="grid_3 alpha"><i>Reason</i></div>
-  <div class="grid_7 omega"><i>Given By</i></div>
+  <div class="grid_3 omega"><i>Given By</i></div>
 </div>
 <div class="clear"></div>
 {% endif %}
-<div class="grid_11 prefix_1 point">
+<div class="grid_6 prefix_1 suffix_5 point">
   <div class="grid_3 alpha">{{ point.description }}</div>
-  <div class="fb_uid grid_7 omega" id="{{ point.issuer_id }}"></div>
+  {% ifequal point.pajas_id logged_in_user.user_id %}
+  <div class="fb_uid grid_1" id="{{ point.issuer_id }}"></div>
+  <div class="grid_1 omega">
+    <form method="post" action="/user_page/{{ user }}">
+      <input type="hidden" name="_csrf_token" value="{{ csrf_token }}" />
+      <input type="hidden" name="point_tag" value="{{point.key}}" />
+      <input type="submit" value="Remove" />    
+    </form>
+  </div>
+  {% else %}
+  {% ifequal point.issuer_id logged_in_user.user_id %}
+  <div class="fb_uid grid_1" id="{{ point.issuer_id }}"></div>
+  <div class="grid_1 omega">
+    <form method="post" action="/user_page/{{ user }}">
+      <input type="hidden" name="_csrf_token" value="{{ csrf_token }}" />
+      <input type="hidden" name="point_tag" value="{{point.key}}" />
+      <input type="submit" value="Remove" />
+    </form>
+  </div>
+  {% else %}
+  <div class="fb_uid grid_1 omega" id="{{ point.issuer_id }}"></div>
+  {% endifequal %}  
+  {% endifequal %}    
 </div>
 {% endfor %}
 
 {% for point in iss_points %}
 {% if forloop.first %}
-<h3 class="grid_11 prefix_1">Pajaspoints given by
+<h3 class="grid_6 prefix_1 suffix_5">Pajaspoints given by
 <div class="fb_uid_name" id="{{ user }}"></div></h3>
 <div class="clear"></div>
-<div class="grid_11 prefix_1">
+<div class="grid_6 prefix_1 suffix_5">
   <div class="grid_3 alpha"><i>Reason</i></div>
-  <div class="grid_7 omega"><i>Given to</i></div>
+  <div class="grid_3 omega"><i>Given to</i></div>
 </div>
 <div class="clear"></div>
 {% endif %}
-<div class="grid_11 prefix_1 point">
+<div class="grid_6 prefix_1 suffix_5 point">
   <div class="grid_3 alpha">{{ point.description }}</div>
+  {% ifequal point.pajas_id logged_in_user.user_id %}
+  <div class="fb_uid grid_1" id="{{ point.pajas_id }}"></div>
+  <div class="grid_1 omega">
+    <form method="post" action="/user_page/{{ user }}">
+      <input type="hidden" name="_csrf_token" value="{{ csrf_token }}" />
+      <input type="hidden" name="point_tag" value="{{point.key}}" />
+      <input type="submit" value="Remove" />    
+    </form>
+  </div>
+  {% else %}
+  {% ifequal point.issuer_id logged_in_user.user_id %}
+  <div class="fb_uid grid_1" id="{{ point.pajas_id }}"></div>
+  <div class="grid_1 omega">
+    <form method="post" action="/user_page/{{ user }}">
+      <input type="hidden" name="_csrf_token" value="{{ csrf_token }}" />
+      <input type="hidden" name="point_tag" value="{{point.key}}" />
+      <input type="submit" value="Remove" />
+    </form>
+  </div>
+  {% else %}
   <div class="fb_uid grid_7 omega" id="{{point.pajas_id}}"></div>
+  {% endifequal %}  
+  {% endifequal %}    
 </div>
 {% endfor %}
 {% endblock %}
