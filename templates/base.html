@@ -27,6 +27,7 @@
 	<a href="/"><img src="/pajas_logo.png" /></a>
       </div>      
       <div class="clear"></div>
+      {% if logged_in_user %}
       <div class="grid_6 prefix_1 suffix_5 menu">
 	{% block navbar %}
 	<a href="/list_points">[Top List]</a>
@@ -37,6 +38,7 @@
         {% endblock %}
       </div>
       <div class="clear"></div>
+      {% endif %}
       
       {% if message %}
       <div class="message {{ message.type }}">{{ message.content|safe }}</div>

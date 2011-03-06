@@ -69,7 +69,7 @@ class User(db.Model):
     picture = db.StringProperty(required=True)
     friends = db.StringListProperty()
     dirty = db.BooleanProperty()
-
+    pajas_friends = db.StringListProperty()
     def refresh_data(self):
         """Refresh this user's data using the Facebook Graph API"""
         me = Facebook().api(u'/me',
@@ -175,7 +175,7 @@ class BaseHandler(webapp.RequestHandler):
     facebook = None
     user = None
     csrf_protect = True
-
+    
     def initialize(self, request, response):
         """General initialization for every request"""
         super(BaseHandler, self).initialize(request, response)
@@ -320,14 +320,20 @@ def user_required(fn):
 
 class UserPage(BaseHandler):
     def get(self, uid):
-        if (uid in self.user.friends) or uid == self.user.user_id:
-            rec_points = Point.all().filter("pajas_id =", 
-                                            uid).order("-submit_time")
-            issued_points = Point.all().filter("issuer_id =", 
-                                               uid).order("-submit_time")
-            self.render(u'user_page', points = rec_points, 
-                        user_name=self.user.name, iss_points = issued_points, 
-                        user=uid)
+        if self.user:
+            if (uid in self.user.friends) or uid == self.user.user_id:
+                rec_points = Point.all().filter("pajas_id =", 
+                                                uid).order("-submit_time")
+                issued_points = Point.all().filter("issuer_id =", 
+                                                   uid).order("-submit_time")
+                self.render(u'user_page', points = rec_points, 
+                            user_name = self.user.name, 
+                            iss_points = issued_points, 
+                            user = uid)
+            else:
+                self.redirect(u"/")
+        else:
+            self.redirect(u"/")
     def post(self, uid):
         if uid:
             if u'point_tag' in self.request.POST:
@@ -347,18 +353,28 @@ class UserPage(BaseHandler):
 class FriendListHandler(BaseHandler):
     def get(self):
         if self.user:
-            friendpoints = []
+            pajas_friends = []
             for friend in self.user.friends:
-                points = Point.all().filter("pajas_id = ", 
-                                              friend).order("-submit_time")
-                nr_of_points = points.count()
-                if nr_of_points > 0:
-                    last_point = points[0]
-                    friendpoints.append((friend, last_point, nr_of_points))
-            if friendpoints:
-                friendpoints = sorted(friendpoints, key=lambda k: k[2], 
-                                      reverse=True)
-            self.render(u'friend_list', friendlist=friendpoints)
+                q = db.GqlQuery("SELECT * FROM Point " + 
+                                "WHERE pajas_id = :1 " +
+                                "ORDER BY submit_time DESC", 
+                                friend)
+                first = True
+                count=0
+                temp_point = None
+                for point in q:
+                    if first:
+                        temp_point = point
+                        count= 1
+                        first=False
+                    else:
+                        count += 1
+                if count > 0:
+                    pajas_friends.append((friend, temp_point, count))
+            if pajas_friends:
+                pajas_friends = sorted(pajas_friends, key=lambda k: k[2],
+                                       reverse=True)
+            self.render(u'friend_list', friendlist=pajas_friends)
         else:
             self.redirect(u'/')
 
@@ -373,7 +389,7 @@ class ListPointsHandler(BaseHandler):
                 else:
                     summary[point.pajas_id] = 1
             summary = sorted(summary.iteritems(), key=itemgetter(1), 
-                             reverse=True)
+                             reverse=True) 
             self.render(u'list_points', summary=summary, points=the_points)
         else:
             self.redirect(u'/')
