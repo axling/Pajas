@@ -9,5 +9,13 @@ handlers:
   upload: static/.*
   expiration: "1d"
 
+- url: /update_friends
+  script: main.py
+  login: admin
+
+- url: /update_new_pajas_point
+  script: main.py
+  login: admin
+
 - url: .*
   script: main.py

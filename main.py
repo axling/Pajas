@@ -254,6 +254,7 @@ class BaseHandler(webapp.RequestHandler):
             self.request.method = u'GET'
             self.set_cookie(
                 'u', facebook.user_cookie, datetime.timedelta(minutes=1440))
+            
         elif 'u' in self.request.cookies:
             facebook.load_signed_request(self.request.cookies.get('u'))
 
@@ -280,6 +281,7 @@ class BaseHandler(webapp.RequestHandler):
                                 name=me[u'name'],
                                 picture=me[u'picture'])
                     user.put()
+                    taskqueue.add(url="/update_friends", method='GET')
                 except KeyError, ex:
                     pass # ignore if can't get the minimum fields
 
@@ -354,7 +356,7 @@ class FriendListHandler(BaseHandler):
     def get(self):
         if self.user:
             pajas_friends = []
-            for friend in self.user.friends:
+            for friend in self.user.pajas_friends:
                 q = db.GqlQuery("SELECT * FROM Point " + 
                                 "WHERE pajas_id = :1 " +
                                 "ORDER BY submit_time DESC", 
@@ -406,6 +408,11 @@ class AddPointsHandler(BaseHandler):
         point = Point(issuer_id = self.user.user_id, pajas_id = friend, 
                       description = description)
         point.put()
+        if not (friend in self.user.pajas_friends):
+            self.user.pajas_friends.append(friend)
+            self.user.put()
+        taskqueue.add(url="/update_new_pajas_point", 
+                      params={"pajas": friend}, method='GET')
         self.redirect(u'/friend_list')
         
 
@@ -416,13 +423,41 @@ class MainHandler(BaseHandler):
         else:
             self.render(u'main')
 
+class UpdateMyFriends(BaseHandler):
+    def get(self):
+        for friend in self.user.friends:
+            if friend in self.user.pajas_friends:
+                continue
+            else:
+                if Point.all().filter("pajas_point =", friend).count(1) > 0:
+                    self.user.pajas_friends.append(friend)
+                    self.user.put()
+                else:
+                    continue
+
+class UpdateNewPajasPoint(BaseHandler):
+    def get(self):
+        pajas = self.request.get('pajas_id')
+        all_users = User.all()
+        for user in all_users:
+            if user.user_id == pajas:
+                continue
+            if pajas in user.friends:
+                if pajas in user.pajas_friends:
+                    continue
+                else:
+                    user.pajas_friends.append(pajas)
+                    user.put()  
+             
 def main():
     routes = [
         (r'/', MainHandler),
         (r'/add_point', AddPointsHandler),
         (r'/list_points', ListPointsHandler),
         (r'/friend_list', FriendListHandler),
-        (r'/user_page/(.*)', UserPage)
+        (r'/user_page/(.*)', UserPage),
+        (r'/update_friends', UpdateMyFriends),
+        (r'/update_new_pajas_point', UpdateNewPajasPoint)
         ]
     application = webapp.WSGIApplication(routes,
         debug=os.environ.get('SERVER_SOFTWARE', '').startswith('Dev'))

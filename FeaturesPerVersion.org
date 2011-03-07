@@ -1,11 +1,11 @@
-** Pagination for pajas points in user_page
-** Loading symbol for FB JS interaction
-** Better handling of top list
-** Ajax handling of add point in user_page
-** Confirmation dialog when deleting point
-** Ability to edit existing pajas points
-** Add logging entries
-** [x] Fix so that you can only see a welcome message when logged out
-** Find a better algorithm for the friend page
-   Tried a solution, will test to see if it is better
-** Facebook dialog for writing on a wall when adding a point
+** [] Pagination for pajas points in user_page
+** [] Loading symbol for FB JS interaction
+** [] Better handling of top list
+** [] Ajax handling of add point in user_page
+** [] Confirmation dialog when deleting point
+** [] Ability to edit existing pajas points
+** [] Add logging entries
+** [X] Fix so that you can only see a welcome message when logged out
+** [X] Find a better algorithm for the friend page
+   Tried a solution, will test to see if it is better -- did not work
+** [] Facebook dialog for writing on a wall when adding a point
