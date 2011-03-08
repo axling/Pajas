@@ -29,6 +29,7 @@ from google.appengine.api import urlfetch, taskqueue
 from google.appengine.ext import db, webapp
 from google.appengine.ext.webapp import util, template
 from google.appengine.runtime import DeadlineExceededError
+from google.appengine.api import memcache
 from random import randrange
 from uuid import uuid4
 from operator import itemgetter
@@ -270,7 +271,7 @@ class BaseHandler(webapp.RequestHandler):
                 # restore stored access_token if necessary
                 if not facebook.access_token:
                     facebook.access_token = user.access_token
-
+                    
             if not user and facebook.access_token:
                 me = facebook.api(u'/me', {u'fields': u'name,picture,friends'})
                 try:
@@ -281,7 +282,6 @@ class BaseHandler(webapp.RequestHandler):
                                 name=me[u'name'],
                                 picture=me[u'picture'])
                     user.put()
-                    taskqueue.add(url="/update_friends", method='GET')
                 except KeyError, ex:
                     pass # ignore if can't get the minimum fields
 
@@ -355,6 +355,12 @@ class UserPage(BaseHandler):
 class FriendListHandler(BaseHandler):
     def get(self):
         if self.user:
+            data = memcache.get(self.user.user_id)
+            if data == "dont_update":
+                pass
+            else:
+                taskqueue.add(url="/update_friends", 
+                              params={'uid':self.user.user_id}, method='GET')
             pajas_friends = []
             for friend in self.user.pajas_friends:
                 q = db.GqlQuery("SELECT * FROM Point " + 
@@ -419,21 +425,27 @@ class AddPointsHandler(BaseHandler):
 class MainHandler(BaseHandler):
     def get(self):
         if self.user:
+            taskqueue.add(url="/update_friends", 
+                          params={'uid':self.user.user_id}, method='GET')
             self.redirect(u'/user_page/' + self.user.user_id)
         else:
             self.render(u'main')
 
 class UpdateMyFriends(BaseHandler):
     def get(self):
-        for friend in self.user.friends:
-            if friend in self.user.pajas_friends:
-                continue
-            else:
-                if Point.all().filter("pajas_point =", friend).count(1) > 0:
-                    self.user.pajas_friends.append(friend)
-                    self.user.put()
-                else:
+        key = self.request.get('uid')
+        user = User.get_by_key_name(key)
+        if user:
+            for friend in user.friends:
+                if friend in user.pajas_friends:
                     continue
+                else:
+                    if Point.all().filter("pajas_id =", friend).count(1) > 0:
+                        user.pajas_friends.append(friend)
+                        user.put()
+            if not memcache.set(key, "dont_update", 3600):
+                logging.error("Memcache set failed")
+                            
 
 class UpdateNewPajasPoint(BaseHandler):
     def get(self):
