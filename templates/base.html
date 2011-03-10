@@ -7,10 +7,12 @@
       {% block title %}Welcome{% endblock %} &mdash; Pajas!
     </title>
     <meta name="description" content="Give Pajas Points to your Friends">
-    <link rel="stylesheet" type="text/css" media="all" href="/reset.css" />
-    <link rel="stylesheet" type="text/css" media="all" href="/text.css" />
-    <link rel="stylesheet" type="text/css" media="all" href="/960.css" />
+    <link rel="stylesheet" type="text/css" media="all" href="/layout.css" />
+    <!--[if IE]>
+    <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
     <link rel="stylesheet" type="text/css" media="all" href="/main.css" />
+    <link rel="stylesheet" type="text/css" href="/menu_style.css" />
     <link rel="stylesheet" type="text/css" media="all" href="/css/ui-lightness/jquery-ui-1.8.9.custom.css" />
     <script src="/jquery-1.5.min.js"></script>
     <script src="/jquery-ui-1.8.9.custom.min.js"></script>
@@ -22,29 +24,34 @@
     </style> 
   </head>
   <body>
-    <div class="container_12">
-      <div class="grid_4 prefix_1 suffix_7">
+    <div class="pagewidth">
+      <div id="header">
 	<a href="/"><img src="/pajas_logo.png" /></a>
-      </div>      
-      <div class="clear"></div>
-      {% if logged_in_user %}
-      <div class="grid_6 prefix_1 suffix_5 menu">
+        {% if logged_in_user %}
 	{% block navbar %}
-	<a href="/list_points">[Top List]</a>
-	<a href="/friend_list">[Pajas Friends]</a>
-	<a href="/user_page/{{logged_in_user.user_id}}">[Me]</a>
-	<a href="/add_point">[Add Point]</a>
-	<a class="logout" onclick="FB.logout()">[Logout]</a>
-        {% endblock %}
+	<ul id="menu">
+	  <li><a href="/list_points" target="_self">Top List</a></li>
+	  <li><a href="/friend_list" target="_self">Pajas Friends</a></li>
+	  <li><a href="/user_page/{{logged_in_user.user_id}}" target="_self">
+	      Me</a></li>
+	  <li><a href="/add_point" target="_self">Add Point</a></li>
+	</ul>
+	{% endblock %}
+      </div>    
+      {% endif %}
+      <div id="wrapper" class="clearfix">
+	<div id="maincol">
+	  {% if message %}
+	  <div class="message {{ message.type }}">{{ message.content|safe }}
+	  </div>
+	  {% endif %}
+	  {% block body %}
+	  {% endblock %}
+	</div>
+	<div id="rightcol">
+	</div>
       </div>
-      <div class="clear"></div>
-      {% endif %}
-      
-      {% if message %}
-      <div class="message {{ message.type }}">{{ message.content|safe }}</div>
-      {% endif %}
-      {% block body %}
-      {% endblock %}
+      <div id="footer"></div>
     </div>
     <script src="/main.js"></script>
     <div id="fb-root"></div>

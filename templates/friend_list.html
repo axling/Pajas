@@ -5,11 +5,16 @@
 {% endblock %}
 
 {% block body %}
+<div class="point">
+  <div class="pajas">Friend</div>
+  <div class="description">Last Point</div>
+  <div class="nr_points">Total Points</div>
+</div>
 {% for uid, last_point, nr_points in friendlist %}
-<div class="grid_11 prefix_1 point">
-  <div class="fb_uid grid_1 alpha" id="{{uid}}"></div>
-  <div class="grid_2">{{ last_point.description }}</div>
-  <div class="grid_7 omega">{{ nr_points }}</div>
+<div class="point">
+  <div class="fb_uid pajas" id="{{uid}}"></div>
+  <div class="description">{{ last_point.description }}</div>
+  <div class="nr_points">{{ nr_points }}</div>
 </div>
 {% endfor %}
 {% endblock %}
