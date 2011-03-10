@@ -12,7 +12,8 @@
 <div class="grid_6 prefix_1 suffix_5">Description</div>
 <div class="clear"></div>
 <div class="grid_6 prefix_1 suffix_5">
-  <form class="inline" method="post" action="/user_page/{{user}}">
+  <form id="add_point" class="inline" method="post" 
+	action="/user_page/{{user}}">
     <textarea class="grid_3 alpha" rows="2" cols="30" name="description"></textarea>
     <input class="grid_1 omega" type="submit" value="Submit" />
     <input type="hidden" name="_csrf_token" value="{{ csrf_token }}" />

@@ -2,10 +2,11 @@
 {% block title %}Add Pajas Points{% endblock %}
 {% block scripts %}
 <script src="/searchFriends.js"></script>
+<script src="/fb_add_point_ui.js"></script>
 {% endblock %}
 {% block body %}
 <div class="ui-widget">
-<form class="inline" method="post" action="/add_point">
+<form id="add_point" class="inline" method="post" action="/add_point">
   <div class="grid_11 prefix_1">
     <div class="grid_3 alpha">Description</div>
     <div class="grid_1 omega">Friend</div>

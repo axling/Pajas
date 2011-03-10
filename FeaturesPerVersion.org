@@ -6,7 +6,7 @@
 ** [] Ability to edit existing pajas points
 ** [] Add logging entries
 ** [X] Fix so that you can only see a welcome message when logged out
-** [] Find a better algorithm for the friend page
+** [X] Find a better algorithm for the friend page
    Fixed main problem by using task queues, need to solve so that an 
    initial search for pajas friends is done   
 ** [] Facebook dialog for writing on a wall when adding a point
