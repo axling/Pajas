@@ -2,26 +2,38 @@
 {% block title %}Add Pajas Points{% endblock %}
 {% block scripts %}
 <script src="/searchFriends.js"></script>
-<script src="/fb_add_point_ui.js"></script>
 {% endblock %}
 {% block body %}
-<div class="ui-widget">
-<form id="add_point" class="inline" method="post" action="/add_point">
-  <div class="grid_11 prefix_1">
-    <div class="grid_3 alpha">Description</div>
-    <div class="grid_1 omega">Friend</div>
-  </div>
-  <div class="clear"></div>
-  <div class="grid_11 prefix_1">
-    <textarea class="grid_3 alpha" rows="2" cols="30" name="description"></textarea>
-    <div class="grid_3">
-      <select id="combobox" name="friend">
-      </select>
-    </div>
-    <input class="grid_1 omega" type="submit" value="Submit" />
-    <input type="hidden" name="_csrf_token" value="{{ csrf_token }}" />
-  </div>
-  <div class="clear"></div>
-</form>
-</div>
+<h3 class="page-header">Add pajas point for any friend</h3>
+<table id="rounded-corner" summary="Add pajaspoint for any friend">
+  <thead>
+    <tr>
+      <th class="rounded-head-left">Description</th>
+      <th colspan="2" class="rounded-head-right">Friend</th>
+    </tr>
+  </thead>
+  <tfoot>
+    <tr>
+      <td class="rounded-foot-left"></td>
+      <td colspan="2" class="rounded-foot-right"></td>
+    </tr>
+  </tfoot>
+  <tbody>
+    <form method="post" action="/add_point">
+      <tr>
+	<td>
+	  <textarea rows="2" cols="30" name="description"></textarea>
+	</td>
+	<td>
+	  <select id="combobox" name="friend">
+	  </select>
+	</td>
+	<td>
+	  <input type="submit" value="Add Point" />
+	  <input type="hidden" name="_csrf_token" value="{{ csrf_token }}" />
+	</td>
+      </tr>
+    </form>
+  </tbody>
+</table>
 {% endblock %}

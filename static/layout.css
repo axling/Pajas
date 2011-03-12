@@ -80,24 +80,104 @@ height: 0;
 }
 
 /* ******************************************************************** */ 
-/*                      Pajas specific                                  */ 
-/* ******************************************************************** */ 
-.point {
-    margin: 0 auto;
+/*                      Rounded Corner Table                            */ 
+/* ******************************************************************** */
+#rounded-corner
+{
+	font-family: "Lucida Sans Unicode", "Lucida Grande", Sans-Serif;
+	font-size: 12px;
+	margin: 20px;
+	width: 100%;
+	text-align: left;
+	border-collapse: collapse;
 }
-.pajas {
-    width: 70px;
+#rounded-corner thead th.rounded-head-left
+{
+	background: #b9c9fe url('/images/left.png') left -1px no-repeat;
 }
-.description {
-    width: 200px;
+#rounded-corner thead th.rounded-head-right
+{
+	background: #b9c9fe url('/images/right.png') right -1px no-repeat;
 }
-.nr_points {
-    width: 120px;
-    margin-rigth: 0px;
-    
+#rounded-corner th
+{
+	padding: 8px;
+	font-weight: normal;
+	font-size: 13px;
+	color: #039;
+	background: #b9c9fe;
+}
+#rounded-corner td
+{
+	padding: 8px;
+	background: #e8edff;
+	border-top: 1px solid #fff;
+	color: #669;
+}
+#rounded-corner tfoot td.rounded-foot-left
+{
+	background: #e8edff url('/images/botleft.png') left bottom no-repeat;
+}
+#rounded-corner tfoot td.rounded-foot-right
+{
+	background: #e8edff url('/images/botright.png') right bottom no-repeat;
+}
+#rounded-corner tbody tr:hover td
+{
+	background: #d0dafd;
 }
 
-.point, .pajas, .description, .nr_points {
-    margin-right: 10px;
-    float:left;
+/* ******************************************************************** */ 
+/*                      Pajas specific                                  */ 
+/* ******************************************************************** */
+html { font-size:100.01%; }
+body {
+  font-size: 75%;
+  color: #222;
+  background: #fff;
+  font-family: sans-serif, "Helvetica Neue", Arial, Helvetica;
+}
+
+.logo-text {
+    font-family: monospace;
+    font-style: italic;
+    font-variant: small-caps;
+    font-weight: normal;
+    font-size: small;
+    line-height: 100%;
+    word-spacing: normal;
+    letter-spacing: 0.3ex;
+    text-decoration: none;
+    text-transform: none;
+    text-align: left;
+    text-indent: 0ex;
+}
+
+.page-header {
+    font-family: sans-serif;
+    font-style: normal;
+    font-variant: normal;
+    font-weight: normal;
+    font-size: large;
+    line-height: 100%;
+    word-spacing: 0.7ex;
+    letter-spacing: 0.3ex;
+    text-decoration: none;
+    text-transform: none;
+    text-align: left;
+    text-indent: 0ex;
+}
+.description {
+    font-family: serif;
+    font-style: normal;
+    font-variant: normal;
+    font-weight: normal;
+    font-size: small;
+    line-height: 100%;
+    word-spacing: normal;
+    letter-spacing: 0.3ex;
+    text-decoration: none;
+    text-transform: none;
+    text-align: center;
+    text-indent: 0ex;
 }
