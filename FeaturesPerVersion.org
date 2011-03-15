@@ -2,7 +2,7 @@
 ** [] Loading symbol for FB JS interaction
 ** [] Better handling of top list
 ** [] Ajax handling of add point in user_page
-** [] Confirmation dialog when deleting point
+** [X] Confirmation dialog when deleting point
 ** [] Ability to edit existing pajas points
 ** [] Add logging entries
 ** [X] Fix so that you can only see a welcome message when logged out

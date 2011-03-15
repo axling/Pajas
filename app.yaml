@@ -1,5 +1,5 @@
 application: pajaspoint
-version: 2
+version: 3
 runtime: python
 api_version: 1
 
@@ -8,14 +8,18 @@ handlers:
   static_files: static/\1
   upload: static/.*
   expiration: "1d"
+  secure: always
 
 - url: /update_friends
   script: main.py
   login: admin
+  secure: always
 
 - url: /update_new_pajas_point
   script: main.py
   login: admin
+  secure: always
 
 - url: .*
   script: main.py
+  secure: always

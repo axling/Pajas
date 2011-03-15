@@ -23,7 +23,6 @@ function fbLogin() {
 		});
 	});
     
-    
     setupComboBox();
     $(function() {
 	    $( "#combobox" ).combobox();		    

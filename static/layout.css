@@ -186,3 +186,23 @@ body {
     text-align: center;
     text-indent: 0ex;
 }
+
+.welcome-text {
+    font-family: serif;
+    font-style: normal;
+    font-variant: normal;
+    font-weight: normal;
+    font-size: small;
+    line-height: 100%;
+    word-spacing: normal;
+    letter-spacing: 0.3ex;
+    text-decoration: none;
+    text-transform: none;
+    text-align: left;
+    text-indent: 0ex;
+    margin-top: 40px;
+}
+
+#login-flow {
+    margin-top: 10px;
+}

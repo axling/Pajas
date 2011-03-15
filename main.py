@@ -68,9 +68,10 @@ class User(db.Model):
     access_token = db.StringProperty(required=True)
     name = db.StringProperty(required=True)
     picture = db.StringProperty(required=True)
-    friends = db.StringListProperty()
+    friends = db.StringListProperty(required=True)
+    friend_names = db.StringListProperty(required=True)
     dirty = db.BooleanProperty()
-    pajas_friends = db.StringListProperty()
+    pajas_friends = db.StringListProperty(required=True)
     def refresh_data(self):
         """Refresh this user's data using the Facebook Graph API"""
         me = Facebook().api(u'/me',
@@ -87,7 +88,7 @@ class Point(db.Model):
     pajas_id = db.StringProperty(required=True)
     description = db.StringProperty(required=True)
     submit_time = db.DateTimeProperty(auto_now_add=True)
-    
+
 
 class FacebookApiError(Exception):
     def __init__(self, result):
@@ -176,7 +177,7 @@ class BaseHandler(webapp.RequestHandler):
     facebook = None
     user = None
     csrf_protect = True
-    
+
     def initialize(self, request, response):
         """General initialization for every request"""
         super(BaseHandler, self).initialize(request, response)
@@ -233,18 +234,14 @@ class BaseHandler(webapp.RequestHandler):
             u'userIdOnServer': self.user.user_id if self.user else None,
         })
         if self.user:
-            friendlist = memcache.get("friendlist_" + self.user.user_id)        
+            friendlist = memcache.get("friendlist_" + self.user.user_id)
             if friendlist is None:
-                friendlist=[]
-                for friend in self.user.friends:
-                    friendname = self.facebook.api(u"/" + friend, 
-                                                   {u'fields': u'name'})
-                    friendlist.append((friend, friendname[u'name']))
-                    if not memcache.add("friendlist_" + self.user.user_id, 
-                                        friendlist, time=7200):
-                        logging.error("Memcache add failed for key: friendlist_"
-                                      + self.user.user_id)
-            data[u'friendlist'] = friendlist            
+                friendlist = zip(self.user.friends, self.user.friend_names)
+                if not memcache.add("friendlist_" + self.user.user_id,
+                                    friendlist, time=7200):
+                    logging.error("Memcache add failed for key: friendlist_"
+                                  + self.user.user_id)
+            data[u'friendlist'] = friendlist
         data[u'logged_in_user'] = self.user
         data[u'message'] = self.get_message()
         data[u'csrf_token'] = self.csrf_token
@@ -253,7 +250,7 @@ class BaseHandler(webapp.RequestHandler):
             os.path.join(
                 os.path.dirname(__file__), 'templates', name + '.html'),
             data))
-        
+
     def init_facebook(self):
         """Sets up the request specific Facebook and User instance"""
         facebook = Facebook()
@@ -268,7 +265,7 @@ class BaseHandler(webapp.RequestHandler):
             self.request.method = u'GET'
             self.set_cookie(
                 'u', facebook.user_cookie, datetime.timedelta(minutes=1440))
-            
+
         elif 'u' in self.request.cookies:
             facebook.load_signed_request(self.request.cookies.get('u'))
 
@@ -284,14 +281,21 @@ class BaseHandler(webapp.RequestHandler):
                 # restore stored access_token if necessary
                 if not facebook.access_token:
                     facebook.access_token = user.access_token
-                    
+
             if not user and facebook.access_token:
                 me = facebook.api(u'/me', {u'fields': u'name,picture,friends'})
                 try:
                     friends = [user[u'id'] for user in me[u'friends'][u'data']]
+                    friend_names = [user[u'name'] for user in
+                                   me[u'friends'][u'data']]
+                    if not memcache.add("friendlist_" + facebook.user_id,
+                                        zip(friends,friend_names), time=7200):
+                        logging.error("Memcache add failed for key: friendlist_"
+                                      + facebook.user_id)
                     user = User(key_name=facebook.user_id,
                                 user_id=facebook.user_id, friends=friends,
-                                access_token=facebook.access_token, 
+                                friend_names=friend_names,
+                                access_token=facebook.access_token,
                                 name=me[u'name'],
                                 picture=me[u'picture'])
                     user.put()
@@ -337,13 +341,13 @@ class UserPage(BaseHandler):
     def get(self, uid):
         if self.user:
             if (uid in self.user.friends) or uid == self.user.user_id:
-                rec_points = Point.all().filter("pajas_id =", 
+                rec_points = Point.all().filter("pajas_id =",
                                                 uid).order("-submit_time")
-                issued_points = Point.all().filter("issuer_id =", 
+                issued_points = Point.all().filter("issuer_id =",
                                                    uid).order("-submit_time")
-                self.render(u'user_page', points = rec_points, 
-                            user_name = self.user.name, 
-                            iss_points = issued_points, 
+                self.render(u'user_page', points = rec_points,
+                            user_name = self.user.name,
+                            iss_points = issued_points,
                             user = uid)
             else:
                 self.redirect(u"/")
@@ -364,7 +368,7 @@ class UserPage(BaseHandler):
                 if not (uid in self.user.pajas_friends):
                     self.user.pajas_friends.append(uid)
                     self.user.put()
-                taskqueue.add(url="/update_new_pajas_point", 
+                taskqueue.add(url="/update_new_pajas_point",
                               params={"pajas": uid}, method='GET')
                 self.redirect(u'/user_page/' + uid)
         else:
@@ -377,13 +381,13 @@ class FriendListHandler(BaseHandler):
             if data == "dont_update":
                 pass
             else:
-                taskqueue.add(url="/update_friends", 
+                taskqueue.add(url="/update_friends",
                               params={'uid':self.user.user_id}, method='GET')
             pajas_friends = []
             for friend in self.user.pajas_friends:
-                q = db.GqlQuery("SELECT * FROM Point " + 
+                q = db.GqlQuery("SELECT * FROM Point " +
                                 "WHERE pajas_id = :1 " +
-                                "ORDER BY submit_time DESC", 
+                                "ORDER BY submit_time DESC",
                                 friend)
                 first = True
                 count=0
@@ -414,8 +418,8 @@ class ListPointsHandler(BaseHandler):
                     summary[point.pajas_id] += 1
                 else:
                     summary[point.pajas_id] = 1
-            summary = sorted(summary.iteritems(), key=itemgetter(1), 
-                             reverse=True) 
+            summary = sorted(summary.iteritems(), key=itemgetter(1),
+                             reverse=True)
             self.render(u'list_points', summary=summary, points=the_points)
         else:
             self.redirect(u'/')
@@ -429,21 +433,21 @@ class AddPointsHandler(BaseHandler):
     def post(self):
         description = self.request.POST[u'description']
         friend = self.request.POST[u'friend']
-        point = Point(issuer_id = self.user.user_id, pajas_id = friend, 
+        point = Point(issuer_id = self.user.user_id, pajas_id = friend,
                       description = description)
         point.put()
         if not (friend in self.user.pajas_friends):
             self.user.pajas_friends.append(friend)
             self.user.put()
-        taskqueue.add(url="/update_new_pajas_point", 
+        taskqueue.add(url="/update_new_pajas_point",
                       params={"pajas": friend}, method='GET')
         self.redirect(u'/friend_list')
-        
+
 
 class MainHandler(BaseHandler):
     def get(self):
         if self.user:
-            taskqueue.add(url="/update_friends", 
+            taskqueue.add(url="/update_friends",
                           params={'uid':self.user.user_id}, method='GET')
             self.redirect(u'/user_page/' + self.user.user_id)
         else:
@@ -463,7 +467,7 @@ class UpdateMyFriends(BaseHandler):
                         user.put()
             if not memcache.set(key, "dont_update", 3600):
                 logging.error("Memcache set failed")
-                            
+
 
 class UpdateNewPajasPoint(BaseHandler):
     def get(self):
@@ -489,7 +493,7 @@ class RedirectFriend(BaseHandler):
                 self.redirect("/user_page/" + self.user.user_id)
         else:
             self.redirect("/user_page/" + self.user.user_id)
-             
+
 def main():
     routes = [
         (r'/', MainHandler),
