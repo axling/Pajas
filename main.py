@@ -232,6 +232,19 @@ class BaseHandler(webapp.RequestHandler):
             u'canvasName': conf.FACEBOOK_CANVAS_NAME,
             u'userIdOnServer': self.user.user_id if self.user else None,
         })
+        if self.user:
+            friendlist = memcache.get("friendlist_" + self.user.user_id)        
+            if friendlist is None:
+                friendlist=[]
+                for friend in self.user.friends:
+                    friendname = self.facebook.api(u"/" + friend, 
+                                                   {u'fields': u'name'})
+                    friendlist.append((friend, friendname[u'name']))
+                    if not memcache.add("friendlist_" + self.user.user_id, 
+                                        friendlist, time=7200):
+                        logging.error("Memcache add failed for key: friendlist_"
+                                      + self.user.user_id)
+            data[u'friendlist'] = friendlist            
         data[u'logged_in_user'] = self.user
         data[u'message'] = self.get_message()
         data[u'csrf_token'] = self.csrf_token
@@ -240,7 +253,7 @@ class BaseHandler(webapp.RequestHandler):
             os.path.join(
                 os.path.dirname(__file__), 'templates', name + '.html'),
             data))
-
+        
     def init_facebook(self):
         """Sets up the request specific Facebook and User instance"""
         facebook = Facebook()
@@ -348,6 +361,11 @@ class UserPage(BaseHandler):
                 point = Point(issuer_id = self.user.user_id, pajas_id = uid,
                               description = description)
                 point.put()
+                if not (uid in self.user.pajas_friends):
+                    self.user.pajas_friends.append(uid)
+                    self.user.put()
+                taskqueue.add(url="/update_new_pajas_point", 
+                              params={"pajas": uid}, method='GET')
                 self.redirect(u'/user_page/' + uid)
         else:
             self.redirect(u'/user_page/' + uid)
@@ -382,7 +400,7 @@ class FriendListHandler(BaseHandler):
             if pajas_friends:
                 pajas_friends = sorted(pajas_friends, key=lambda k: k[2],
                                        reverse=True)
-            self.render(u'friend_list', friendlist=pajas_friends)
+            self.render(u'friend_list', friendspajaspoints=pajas_friends)
         else:
             self.redirect(u'/')
 
@@ -405,7 +423,7 @@ class ListPointsHandler(BaseHandler):
 class AddPointsHandler(BaseHandler):
     def get(self):
         if self.user:
-            self.render(u'add_points', friends = self.user.friends)
+            self.render(u'add_points')
         else:
             self.redirect(u'/')
     def post(self):
@@ -459,7 +477,18 @@ class UpdateNewPajasPoint(BaseHandler):
                     continue
                 else:
                     user.pajas_friends.append(pajas)
-                    user.put()  
+                    user.put()
+
+class RedirectFriend(BaseHandler):
+    def post(self):
+        friend = self.request.POST[u'friend']
+        if friend != "none" :
+            if friend in self.user.friends:
+                self.redirect("/user_page/" + friend)
+            else:
+                self.redirect("/user_page/" + self.user.user_id)
+        else:
+            self.redirect("/user_page/" + self.user.user_id)
              
 def main():
     routes = [
@@ -469,7 +498,8 @@ def main():
         (r'/friend_list', FriendListHandler),
         (r'/user_page/(.*)', UserPage),
         (r'/update_friends', UpdateMyFriends),
-        (r'/update_new_pajas_point', UpdateNewPajasPoint)
+        (r'/update_new_pajas_point', UpdateNewPajasPoint),
+        (r'/redirect_friend', RedirectFriend)
         ]
     application = webapp.WSGIApplication(routes,
         debug=os.environ.get('SERVER_SOFTWARE', '').startswith('Dev'))

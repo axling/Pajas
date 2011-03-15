@@ -19,7 +19,7 @@ ul#menu li{
 	display:block;
 	float:left;
 	margin:0;
-	pading:0;}
+	padding:0;}
 ul#menu li a{
 	display:block;
 	float:left;
@@ -33,3 +33,8 @@ ul#menu li a{
 ul#menu li a:hover{
 	background:transparent url("images/HOVER.gif") no-repeat top right;	
 	}
+ul#menu li.search-bar {
+    color:#8c3a3a;
+    margin-left:140px;
+    padding-top: 3px;;
+}
