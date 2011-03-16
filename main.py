@@ -68,19 +68,9 @@ class User(db.Model):
     access_token = db.StringProperty(required=True)
     name = db.StringProperty(required=True)
     picture = db.StringProperty(required=True)
-    friends = db.StringListProperty(required=True)
-    friend_names = db.StringListProperty(required=True)
-    dirty = db.BooleanProperty()
-    pajas_friends = db.StringListProperty(required=True)
-    def refresh_data(self):
-        """Refresh this user's data using the Facebook Graph API"""
-        me = Facebook().api(u'/me',
-            {u'fields': u'picture,friends', u'access_token': self.access_token})
-        self.dirty = False
-        self.name = me[u'name']
-        self.picture = me[u'picture']
-        self.friends = [user[u'id'] for user in me[u'friends'][u'data']]
-        return self.put()
+    friends = db.StringListProperty()
+    friend_names = db.StringListProperty()
+    pajas_friends = db.StringListProperty()
 
 class Point(db.Model):
     """The Pajas Point model"""
@@ -132,7 +122,6 @@ class Facebook(object):
             sig, payload = signed_request.split(u'.', 1)
             sig = self.base64_url_decode(sig)
             data = json.loads(self.base64_url_decode(payload))
-
             expected_sig = hmac.new(
                 self.app_secret, msg=payload, digestmod=hashlib.sha256).digest()
 
@@ -143,6 +132,7 @@ class Facebook(object):
                 self.user_id = data.get(u'user_id')
                 self.access_token = data.get(u'oauth_token')
         except ValueError, ex:
+            logging.error("Can't split signed signed request into sig and payload")
             pass # ignore if can't split on dot
 
     @property
@@ -181,7 +171,6 @@ class BaseHandler(webapp.RequestHandler):
     def initialize(self, request, response):
         """General initialization for every request"""
         super(BaseHandler, self).initialize(request, response)
-
         try:
             self.init_facebook()
             self.init_csrf()
@@ -285,9 +274,10 @@ class BaseHandler(webapp.RequestHandler):
             if not user and facebook.access_token:
                 me = facebook.api(u'/me', {u'fields': u'name,picture,friends'})
                 try:
+                    
                     friends = [user[u'id'] for user in me[u'friends'][u'data']]
                     friend_names = [user[u'name'] for user in
-                                   me[u'friends'][u'data']]
+                                    me[u'friends'][u'data']]
                     if not memcache.add("friendlist_" + facebook.user_id,
                                         zip(friends,friend_names), time=7200):
                         logging.error("Memcache add failed for key: friendlist_"
@@ -299,9 +289,11 @@ class BaseHandler(webapp.RequestHandler):
                                 name=me[u'name'],
                                 picture=me[u'picture'])
                     user.put()
-                except KeyError, ex:
-                    pass # ignore if can't get the minimum fields
-
+                except:
+                    # ignore if can't get the minimum fields
+                    logging.error("Can't get minimum amount of fields when initializing facebook")
+                    raise
+                    
         self.facebook = facebook
         self.user = user
 
@@ -424,26 +416,6 @@ class ListPointsHandler(BaseHandler):
         else:
             self.redirect(u'/')
 
-class AddPointsHandler(BaseHandler):
-    def get(self):
-        if self.user:
-            self.render(u'add_points')
-        else:
-            self.redirect(u'/')
-    def post(self):
-        description = self.request.POST[u'description']
-        friend = self.request.POST[u'friend']
-        point = Point(issuer_id = self.user.user_id, pajas_id = friend,
-                      description = description)
-        point.put()
-        if not (friend in self.user.pajas_friends):
-            self.user.pajas_friends.append(friend)
-            self.user.put()
-        taskqueue.add(url="/update_new_pajas_point",
-                      params={"pajas": friend}, method='GET')
-        self.redirect(u'/friend_list')
-
-
 class MainHandler(BaseHandler):
     def get(self):
         if self.user:
@@ -497,7 +469,6 @@ class RedirectFriend(BaseHandler):
 def main():
     routes = [
         (r'/', MainHandler),
-        (r'/add_point', AddPointsHandler),
         (r'/list_points', ListPointsHandler),
         (r'/friend_list', FriendListHandler),
         (r'/user_page/(.*)', UserPage),

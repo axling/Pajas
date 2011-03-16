@@ -8,18 +8,18 @@ handlers:
   static_files: static/\1
   upload: static/.*
   expiration: "1d"
-  secure: always
+  secure: optional
 
 - url: /update_friends
   script: main.py
   login: admin
-  secure: always
+  secure: optional
 
 - url: /update_new_pajas_point
   script: main.py
   login: admin
-  secure: always
+  secure: optional
 
 - url: .*
   script: main.py
-  secure: always
+  secure: optional

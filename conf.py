@@ -21,10 +21,3 @@ FACEBOOK_CANVAS_NAME = 'pajaspoint'
 
 # A random token for use with the Real-time API.
 FACEBOOK_REALTIME_VERIFY_TOKEN = 'RANDOM TOKEN'
-
-# The external URL this application is available at where the Real-time API will
-# send it's pings.
-EXTERNAL_HREF = 'http://runwithfriends.appspot.com/'
-
-# Facebook User IDs of admins. The poor mans admin system.
-ADMIN_USER_IDS = ['5526183']
