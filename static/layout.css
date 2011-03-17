@@ -142,6 +142,10 @@ body {
   font-family: sans-serif, "Helvetica Neue", Arial, Helvetica;
 }
 
+.search-box {
+    height:8px;
+}
+
 .logo-text {
     font-family: monospace;
     font-style: italic;

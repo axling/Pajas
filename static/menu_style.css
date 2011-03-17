@@ -10,7 +10,7 @@ ul#menu{
 	text-transform:uppercase;
 	font-size:12px;
 	font-weight:bold;
-	background:transparent url("images/OFF.gif") repeat-x top left;
+	background:transparent url("images/my_off.png") repeat-x top left;
 	font-family:Helvetica,Arial,Verdana,sans-serif;
 	border-bottom:4px solid #555555;
 	border-top:1px solid #919191;
@@ -23,7 +23,7 @@ ul#menu li{
 ul#menu li a{
 	display:block;
 	float:left;
-	color:#8c3a3a;
+	color: #039; /*#8c3a3a;*/
 	text-decoration:none;
 	font-weight:bold;
 	padding:12px 20px 0 20px;
@@ -31,10 +31,11 @@ ul#menu li a{
 	background:transparent url("images/DIVIDER.gif") no-repeat top right;
 	}
 ul#menu li a:hover{
-	background:transparent url("images/HOVER.gif") no-repeat top right;	
+	background:transparent url("images/my_hover.png") no-repeat top right;	
 	}
 ul#menu li.search-bar {
-    color:#8c3a3a;
+    color: #039;
     margin-left:140px;
+    margin-top:2px;
     padding-top: 3px;;
 }

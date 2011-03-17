@@ -37,7 +37,7 @@ function setupComboBox() {
 			select = this.element.hide(),
 			selected = select.children( ":selected" ),
 			value = selected.val() ? selected.text() : "";
-		    var input = this.input = $( "<input>" )
+		    var input = this.input = $( "<input class='search-box'>" )
 			.insertAfter( select )
 			.val( value )
 			.autocomplete({
