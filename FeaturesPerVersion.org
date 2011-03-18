@@ -3,7 +3,7 @@
 ** [] Better handling of top list
 ** [] Ajax handling of add point in user_page
 ** [X] Confirmation dialog when deleting point
-** [] Ability to edit existing pajas points
+** [X] Ability to edit existing pajas points
 ** [] Add logging entries
 ** [X] Fix so that you can only see a welcome message when logged out
 ** [X] Find a better algorithm for the friend page

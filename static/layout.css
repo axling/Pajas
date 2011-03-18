@@ -93,11 +93,11 @@ height: 0;
 }
 #rounded-corner thead th.rounded-head-left
 {
-	background: #b9c9fe url('/images/left.png') left -1px no-repeat;
+    background: #b9c9fe url('/images/left.png') left -1px no-repeat;
 }
 #rounded-corner thead th.rounded-head-right
 {
-	background: #b9c9fe url('/images/right.png') right -1px no-repeat;
+    background: #b9c9fe url('/images/right.png') right -1px no-repeat;
 }
 #rounded-corner th
 {

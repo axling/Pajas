@@ -36,7 +36,7 @@ from operator import itemgetter
 import Cookie
 import base64
 import cgi
-import debug_conf as conf
+import conf
 import datetime
 import hashlib
 import hmac
@@ -347,10 +347,17 @@ class UserPage(BaseHandler):
             self.redirect(u"/")
     def post(self, uid):
         if uid:
-            if u'point_tag' in self.request.POST:
-                key = self.request.POST[u'point_tag']
+            if u'remove_point_tag' in self.request.POST:
+                key = self.request.POST[u'remove_point_tag']
                 the_point = Point.get(key)
                 the_point.delete()
+                self.redirect(u'/user_page/' + uid)
+            elif u'edit_point_tag' in self.request.POST:
+                key = self.request.POST[u'edit_point_tag']
+                description = self.request.POST[u'description']
+                point = Point.get(key)
+                point.description=description
+                point.put()
                 self.redirect(u'/user_page/' + uid)
             else:
                 description = self.request.POST[u'description']

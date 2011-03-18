@@ -1,31 +1,33 @@
 function fbLogin() {
     // Functionality for getting FB users picture and name
-    $('.fb_uid').each(function() {
-	    var uid = this.id;
-	    var string = "";
-	    // We must save this so we can use it inside FB.api
-	    var selected = $(this);
-	    FB.api("/" + uid, function(response) {
-		    string = "<img src='http://graph.facebook.com/" +
-			uid + "/picture' /><a href='/user_page/" + uid
-			+ "'>" + response.name +"</a>";
-		    selected.html(string);
+    $(document).ready(function() {
+	    $('.fb_uid').each(function() {
+		    var uid = this.id;
+		    var string = "";
+		    // We must save this so we can use it inside FB.api
+		    var selected = $(this);
+		    FB.api("/" + uid, function(response) {
+			    string = "<img src='http://graph.facebook.com/" +
+				uid + "/picture' /><a href='/user_page/" + uid
+				+ "'>" + response.name +"</a>";
+			    selected.html(string);
+			});
+	    
+		});
+	    // Functionality for getting FB users name
+	    $('.fb_uid_name').each(function() {
+		    var uid = this.id;
+		    // We must save this so we can use it inside FB.api
+		    var selected = $(this);
+		    FB.api("/" + uid, function(response) {
+			    selected.replaceWith(response.name);
+			});
 		});
 	    
-	});
-    // Functionality for getting FB users name
-    $('.fb_uid_name').each(function() {
-	    var uid = this.id;
-	    // We must save this so we can use it inside FB.api
-	    var selected = $(this);
-	    FB.api("/" + uid, function(response) {
-		    selected.replaceWith(response.name);
+	    setupComboBox();
+	    $(function() {
+		    $( "#combobox" ).combobox();		    
 		});
-	});
-    
-    setupComboBox();
-    $(function() {
-	    $( "#combobox" ).combobox();		    
 	});
 }
 
