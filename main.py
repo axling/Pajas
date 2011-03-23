@@ -36,7 +36,7 @@ from operator import itemgetter
 import Cookie
 import base64
 import cgi
-import conf
+import debug_conf as conf
 import datetime
 import hashlib
 import hmac
@@ -44,6 +44,7 @@ import logging
 import time
 import traceback
 import urllib
+import facebook
 
 
 def htmlescape(text):
@@ -364,6 +365,15 @@ class UserPage(BaseHandler):
                 point = Point(issuer_id = self.user.user_id, pajas_id = uid,
                               description = description)
                 point.put()
+                graph = facebook.GraphAPI(self.user.access_token)
+                friend_index = self.user.friends.index(uid)
+                friend_name = self.user.friend_names[friend_index]
+                message = "Pajas! you have received a pajas point by " + self.user.name + " with the reason: " + description
+                post_dict = {"name": "Pajas Points for " + friend_name ,
+                             "link": 
+                             "http://apps.facebook.com/pajaspoint/user_page/" + uid}
+                graph.put_wall_post(profile_id=uid, message=message,
+                                 attachment=post_dict)
                 if not (uid in self.user.pajas_friends):
                     self.user.pajas_friends.append(uid)
                     self.user.put()
