@@ -37,7 +37,7 @@ from operator import itemgetter
 import Cookie
 import base64
 import cgi
-import debug_conf as conf
+import conf
 import datetime
 import hashlib
 import hmac
@@ -435,7 +435,7 @@ class ListPointsHandler(BaseHandler):
                 cachedsummary=summary[0:9]
             friendcachedsummary = []
             for uid, score in cachedsummary:
-                if uid in self.user.friends:
+                if uid in self.user.friends or uid == self.user.user_id:
                     friendcachedsummary.append((uid, score, True))
                 else:
                     friendcachedsummary.append((uid, score, False))

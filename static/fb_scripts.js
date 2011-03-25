@@ -9,7 +9,7 @@ function fbLogin() {
 		    FB.api("/" + uid, function(response) {
 			    string = "<img src='http://graph.facebook.com/" +
 				uid + "/picture' /><a href='/user_page/" + uid
-				+ "'>" + response.name +"</a>";
+				+ "/1'>" + response.name +"</a>";
 			    selected.html(string);
 			});
 	    
