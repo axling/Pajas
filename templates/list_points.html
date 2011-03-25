@@ -20,10 +20,14 @@
   </tfoot>
   <tbody>
     {% if summary %}
-    {% for uid, count in summary %}
+    {% for uid, count, friend in summary %}
     <tr>
       <td>
+	{% if friend %}
 	<div class="fb_uid" id="{{uid}}"></div>
+	{% else %}
+	<div class="fb_uid_no_link" id="{{uid}}"></div>
+	{% endif%}
       </td>
       <td>{{count}}</td>
     </tr>

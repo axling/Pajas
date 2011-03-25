@@ -23,6 +23,7 @@ from google.appengine.dist import use_library
 use_library('django', '1.2')
 
 from django.template.defaultfilters import register
+from django.core.paginator import Paginator, InvalidPage, EmptyPage
 from django.utils import simplejson as json
 from functools import wraps
 from google.appengine.api import urlfetch, taskqueue
@@ -36,7 +37,7 @@ from operator import itemgetter
 import Cookie
 import base64
 import cgi
-import conf
+import debug_conf as conf
 import datetime
 import hashlib
 import hmac
@@ -78,8 +79,7 @@ class Point(db.Model):
     pajas_id = db.StringProperty(required=True)
     description = db.StringProperty(required=True)
     submit_time = db.DateTimeProperty(auto_now_add=True)
-
-
+    
 class FacebookApiError(Exception):
     def __init__(self, result):
         self.result = result
@@ -330,48 +330,58 @@ def user_required(fn):
     return wrapper
 
 class UserPage(BaseHandler):
-    def get(self, uid):
+    def get(self, uid, page):
         if self.user:
             if (uid in self.user.friends) or uid == self.user.user_id:
-                rec_points = Point.all().filter("pajas_id =",
-                                                uid).order("-submit_time")
-                issued_points = Point.all().filter("issuer_id =",
-                                                   uid).order("-submit_time")
+                rec_points_q = None
+                try:
+                    page = int(page)
+                except:
+                    page = 1
+                rec_points_q = Point.all().filter("pajas_id =",
+                                                  uid).order("-submit_time")
+                paginator = Paginator(rec_points_q, 5)
+                try:
+                    rec_points = paginator.page(page)
+                except(EmptyPage, InvalidPage):
+                    rec_points = paginator.page(paginator.num_pages)
                 self.render(u'user_page', points = rec_points,
-                            user_name = self.user.name,
-                            iss_points = issued_points,
-                            user = uid)
+                            user_name = self.user.name, user = uid)
             else:
                 self.redirect(u"/")
         else:
             self.redirect(u"/")
-    def post(self, uid):
+    def post(self, uid, page):
+        try:
+            page = int(page)
+        except:
+            page = 1
         if uid:
             if u'remove_point_tag' in self.request.POST:
                 key = self.request.POST[u'remove_point_tag']
                 the_point = Point.get(key)
                 the_point.delete()
-                self.redirect(u'/user_page/' + uid)
+                self.redirect(u'/user_page/' + uid + u'/' + str(page))
             elif u'edit_point_tag' in self.request.POST:
                 key = self.request.POST[u'edit_point_tag']
                 description = self.request.POST[u'description']
                 point = Point.get(key)
                 point.description=description
                 point.put()
-                self.redirect(u'/user_page/' + uid)
+                self.redirect(u'/user_page/' + uid + u'/' + str(page))
             else:
                 description = self.request.POST[u'description']
                 point = Point(issuer_id = self.user.user_id, pajas_id = uid,
                               description = description)
                 point.put()
-                if not (uid in self.user.pajas_friends):
+                if (not (uid in self.user.pajas_friends)) and (uid != self.user.user_id):
                     self.user.pajas_friends.append(uid)
                     self.user.put()
                 taskqueue.add(url="/update_new_pajas_point",
                               params={"pajas": uid}, method='GET')
-                self.redirect(u'/user_page/' + uid)
+                self.redirect(u'/user_page/' + uid + u'/' + str(page))
         else:
-            self.redirect(u'/user_page/' + uid)
+            self.redirect(u'/user_page/' + uid + u'/' + str(page))
 
 class FriendListHandler(BaseHandler):
     def get(self):
@@ -410,16 +420,27 @@ class FriendListHandler(BaseHandler):
 class ListPointsHandler(BaseHandler):
     def get(self):
         if self.user:
-            summary = {}
-            the_points = Point.all()
-            for point in the_points:
-                if(point.pajas_id in summary):
-                    summary[point.pajas_id] += 1
+            cachedsummary = memcache.get("pajas_top_list")
+            if cachedsummary == None:
+                summary = {}
+                the_points = Point.all()
+                for point in the_points:
+                    if(point.pajas_id in summary):
+                        summary[point.pajas_id] += 1
+                    else:
+                        summary[point.pajas_id] = 1
+                summary = sorted(summary.iteritems(), key=itemgetter(1),
+                                 reverse=True)
+                memcache.set("pajas_top_list", summary, 3600)
+                cachedsummary=summary[0:9]
+            friendcachedsummary = []
+            for uid, score in cachedsummary:
+                if uid in self.user.friends:
+                    friendcachedsummary.append((uid, score, True))
                 else:
-                    summary[point.pajas_id] = 1
-            summary = sorted(summary.iteritems(), key=itemgetter(1),
-                             reverse=True)
-            self.render(u'list_points', summary=summary, points=the_points)
+                    friendcachedsummary.append((uid, score, False))
+                    
+            self.render(u'list_points', summary=friendcachedsummary)
         else:
             self.redirect(u'/')
 
@@ -428,7 +449,7 @@ class MainHandler(BaseHandler):
         if self.user:
             taskqueue.add(url="/update_friends",
                           params={'uid':self.user.user_id}, method='GET')
-            self.redirect(u'/user_page/' + self.user.user_id)
+            self.redirect(u'/user_page/' + self.user.user_id + '/1')
         else:
             self.render(u'main')
 
@@ -462,25 +483,39 @@ class UpdateNewPajasPoint(BaseHandler):
                     user.pajas_friends.append(pajas)
                     user.put()
 
+class UpdateTopList(BaseHandler):
+    def get(self):
+        summary = {}
+        the_points = Point.all()
+        for point in the_points:
+            if(point.pajas_id in summary):
+                summary[point.pajas_id] += 1
+            else:
+                summary[point.pajas_id] = 1
+        summary = sorted(summary.iteritems(), key=itemgetter(1),
+                         reverse=True)
+        memcache.set("pajas_top_list", summary[0:9], 3600)
+
 class RedirectFriend(BaseHandler):
     def post(self):
         friend = self.request.POST[u'friend']
         if friend != "none" :
             if friend in self.user.friends:
-                self.redirect("/user_page/" + friend)
+                self.redirect(u"/user_page/" + friend + u"/1")
             else:
-                self.redirect("/user_page/" + self.user.user_id)
+                self.redirect(u"/user_page/" + self.user.user_id + u"/1")
         else:
-            self.redirect("/user_page/" + self.user.user_id)
+            self.redirect(u"/user_page/" + self.user.user_id + u"/1")
 
 def main():
     routes = [
         (r'/', MainHandler),
         (r'/list_points', ListPointsHandler),
         (r'/friend_list', FriendListHandler),
-        (r'/user_page/(.*)', UserPage),
+        (r'/user_page/(.*)/(.*)', UserPage),
         (r'/update_friends', UpdateMyFriends),
         (r'/update_new_pajas_point', UpdateNewPajasPoint),
+        (r'/update_top_list', UpdateTopList),
         (r'/redirect_friend', RedirectFriend)
         ]
     application = webapp.WSGIApplication(routes,

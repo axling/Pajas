@@ -14,6 +14,17 @@ function fbLogin() {
 			});
 	    
 		});
+	    $('.fb_uid_no_link').each(function() {
+		    var uid = this.id;
+		    var string = "";
+		    // We must save this so we can use it inside FB.api
+		    var selected = $(this);
+		    FB.api("/" + uid, function(response) {
+			    string = "<img src='http://graph.facebook.com/" +
+				uid + "/picture' />"+ response.name;
+			    selected.html(string);
+			});	    
+		});
 	    // Functionality for getting FB users name
 	    $('.fb_uid_name').each(function() {
 		    var uid = this.id;

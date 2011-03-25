@@ -20,6 +20,12 @@ handlers:
   login: admin
   secure: optional
 
+- url: /update_top_list
+  script: main.py
+  login: admin
+  secure: optional
+
 - url: .*
   script: main.py
   secure: optional
+

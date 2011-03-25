@@ -1,6 +1,6 @@
-** [] Pagination for pajas points in user_page
-** [] Loading symbol for FB JS interaction
-** [] Better handling of top list
+** [X] Pagination for pajas points in user_page
+** [] Minimize amount of javascript lookups to FB
+** [X] Better handling of top list
 ** [] Ajax handling of add point in user_page
 ** [X] Confirmation dialog when deleting point
 ** [X] Ability to edit existing pajas points
@@ -9,4 +9,5 @@
 ** [X] Find a better algorithm for the friend page
    Fixed main problem by using task queues, need to solve so that an 
    initial search for pajas friends is done   
-** [] Facebook dialog for writing on a wall when adding a point
+** [X] Facebook dialog for writing on a wall when adding a point
+   Fixed this by posting directly to the friends wall when adding the point
