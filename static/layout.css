@@ -210,3 +210,7 @@ body {
 #login-flow {
     margin-top: 10px;
 }
+
+.logo-link{
+    border:none;
+}
