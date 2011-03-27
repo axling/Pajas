@@ -6,7 +6,7 @@
 {% endblock %}
 
 {% block body %}
-<h3 class="page-header">Pajas points for <div class="fb_uid_name" id="{{ user }}"></div></h3>
+<h3 class="page-header">Pajas points for {{user_name}}</h3>
 <table id="rounded-corner" summary="Your Pajaspoints">
   <thead>
     <tr>
@@ -16,7 +16,7 @@
   </thead>
   <tfoot>
     <tr>
-      <th colspan="4">Add Pajaspoint for <div class="fb_uid_name" id="{{ user }}"></div></th>
+      <th colspan="4">Add Pajaspoint for {{user_name}}</th>
     </tr>
     <tr>
       <form id="add_point" method="post" 
@@ -49,11 +49,13 @@
     </tr>
   </tfoot>
   <tbody>
-    {% for point in points.object_list %}
+    {% for name, point in points.object_list %}
     <tr>
       <td><span class="description">{{ point.description }}</span></td>
       {% ifequal point.pajas_id logged_in_user.user_id %}
-      <td><div class="fb_uid" id="{{ point.issuer_id }}"></div></td>
+      <td><img src="http://graph.facebook.com/{{point.issuer_id}}/picture">
+	<a href="/user_page/{{point.issuer_id}}/1">{{name}}</a>
+      </td>
       <td>
 	{% ifequal point.issuer_id logged_in_user.user_id %}
 	<div>
@@ -76,7 +78,9 @@
       </td>
       {% else %}
       {% ifequal point.issuer_id logged_in_user.user_id %}
-      <td><div class="fb_uid" id="{{ point.issuer_id }}"></div></td>
+      <td><img src="http://graph.facebook.com/{{point.issuer_id}}/picture">
+	<a href="/user_page/{{point.issuer_id}}/1">{{name}}</a>
+      </td>
       <td>
 	<div>
 	  <form>
@@ -97,14 +101,15 @@
       </td>
       {% else %}
       <td colspan="3">
-	<div class="fb_uid" id="{{ point.issuer_id }}"></div>
+	<img src="http://graph.facebook.com/{{point.issuer_id}}/picture">
+	<a href="/user_page/{{point.issuer_id}}/1">{{name}}</a>
       </td>
       {% endifequal %}  
       {% endifequal %}  
     </tr>
     {% empty %}
     <tr>
-      <td colspan="4">No pajaspoints exists for <div class="fb_uid_name" id="{{ user }}">
+      <td colspan="4">No pajaspoints exists for {{user_name}}
       </td>
     </tr>
     {% endfor %}

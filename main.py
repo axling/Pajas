@@ -37,7 +37,7 @@ from operator import itemgetter
 import Cookie
 import base64
 import cgi
-import conf
+import debug_conf as conf
 import datetime
 import hashlib
 import hmac
@@ -252,6 +252,10 @@ class BaseHandler(webapp.RequestHandler):
             # we reset the method to GET because a request from facebook with a
             # signed_request uses POST for security reasons, despite it
             # actually being a GET. in webapp causes loss of request.POST data.
+            if facebook.access_token and facebook.user_id:
+                taskqueue.add(url="/update_friend_info",
+                              params={"user": facebook.user_id, 
+                                      "access_token": facebook.access_token}, method='GET')
             self.request.method = u'GET'
             self.set_cookie(
                 'u', facebook.user_cookie, datetime.timedelta(minutes=1440))
@@ -279,6 +283,8 @@ class BaseHandler(webapp.RequestHandler):
                     friends = [user[u'id'] for user in me[u'friends'][u'data']]
                     friend_names = [user[u'name'] for user in
                                     me[u'friends'][u'data']]
+                    taskqueue.add(url="/update_friend_info",
+                                  params={"user": user, "access_token": facebook.access_token}, method='GET')
                     if not memcache.add("friendlist_" + facebook.user_id,
                                         zip(friends,friend_names), time=7200):
                         logging.error("Memcache add failed for key: friendlist_"
@@ -341,13 +347,22 @@ class UserPage(BaseHandler):
                     page = 1
                 rec_points_q = Point.all().filter("pajas_id =",
                                                   uid).order("-submit_time")
-                paginator = Paginator(rec_points_q, 5)
+                compiled_points=[]
+                for point in rec_points_q:
+                    index = self.user.friends.index(point.issuer_id)
+                    compiled_points.append((self.user.friend_names[index], point))
+                paginator = Paginator(compiled_points, 5)
                 try:
                     rec_points = paginator.page(page)
                 except(EmptyPage, InvalidPage):
                     rec_points = paginator.page(paginator.num_pages)
+                if uid != self.user.user_id:
+                    index = self.user.friends.index(uid)
+                    name = self.user.friend_names[index]
+                else:
+                    name = self.user.name
                 self.render(u'user_page', points = rec_points,
-                            user_name = self.user.name, user = uid)
+                            user_name = name, user = uid)
             else:
                 self.redirect(u"/")
         else:
@@ -420,9 +435,17 @@ class FriendListHandler(BaseHandler):
                     else:
                         count += 1
                 if count > 0:
-                    pajas_friends.append((friend, temp_point, count))
+                    i = self.user.friends.index(friend)
+                    try: 
+                        name = self.user.friend_names[i]
+                    except IndexError, ex:
+                        logging.error("Exception when getting name: " + str(ex))
+                        name= ""
+                    pajas_friends.append((friend, name, temp_point, 
+                                              count))
+
             if pajas_friends:
-                pajas_friends = sorted(pajas_friends, key=lambda k: k[2],
+                pajas_friends = sorted(pajas_friends, key=lambda k: k[3],
                                        reverse=True)
             self.render(u'friend_list', friendspajaspoints=pajas_friends)
         else:
@@ -506,7 +529,22 @@ class UpdateTopList(BaseHandler):
         summary = sorted(summary.iteritems(), key=itemgetter(1),
                          reverse=True)
         memcache.set("pajas_top_list", summary[0:9], 3600)
-
+        
+class UpdateFriendInfo(BaseHandler):
+    def get(self):
+        user = self.request.get('user')
+        access_token = self.request.get('access_token')
+        graph = facebook.GraphAPI(access_token)
+        pajas = User.get_by_key_name(user)
+        me = graph.get_object("/me")
+        friends = graph.get_connections(u"/me", "friends")
+        friends_uids = [friend[u"id"] for friend in friends[u'data']]
+        friend_names = [friend[u"name"] for friend in friends[u'data']]
+        pajas.friend_names = friend_names
+        pajas.friends = friends_uids
+        pajas.name = me[u'name']
+        pajas.put()
+        
 class RedirectFriend(BaseHandler):
     def post(self):
         friend = self.request.POST[u'friend']
@@ -527,6 +565,7 @@ def main():
         (r'/update_friends', UpdateMyFriends),
         (r'/update_new_pajas_point', UpdateNewPajasPoint),
         (r'/update_top_list', UpdateTopList),
+        (r"/update_friend_info", UpdateFriendInfo),
         (r'/redirect_friend', RedirectFriend)
         ]
     application = webapp.WSGIApplication(routes,

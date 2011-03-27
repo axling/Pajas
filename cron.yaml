@@ -1,0 +1,4 @@
+cron:
+ - description: compile top list
+   url: /update_top_list
+   schedule: every 60 minutes synchronized

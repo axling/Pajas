@@ -37,5 +37,6 @@ ul#menu li.search-bar {
     color: #039;
     margin-left:140px;
     margin-top:2px;
-    padding-top: 3px;;
+    margin-bottom:2px;
+    vertical-align:center;
 }

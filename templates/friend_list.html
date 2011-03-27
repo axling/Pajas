@@ -20,9 +20,10 @@
     </tr>
   </tfoot>
   <tbody>
-    {% for uid, last_point, nr_points in friendspajaspoints %}
+    {% for uid, name, last_point, nr_points in friendspajaspoints %}
     <tr>
-      <td><div class="fb_uid" id="{{uid}}"></div></td>
+      <td><img src="http://graph.facebook.com/{{uid}}/picture" />
+	<a href="/user_page/{{uid}}/1">{{name}}</a></td>
       <td><span class="description">{{ last_point.description }}
       </span></td>
       <td>{{ nr_points }}</td>

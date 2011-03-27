@@ -12,7 +12,7 @@ function fbLogin() {
 				+ "/1'>" + response.name +"</a>";
 			    selected.html(string);
 			});
-	    
+
 		});
 	    $('.fb_uid_no_link').each(function() {
 		    var uid = this.id;
@@ -23,7 +23,7 @@ function fbLogin() {
 			    string = "<img src='http://graph.facebook.com/" +
 				uid + "/picture' />"+ response.name;
 			    selected.html(string);
-			});	    
+			});
 		});
 	    // Functionality for getting FB users name
 	    $('.fb_uid_name').each(function() {
@@ -34,14 +34,14 @@ function fbLogin() {
 			    selected.replaceWith(response.name);
 			});
 		});
-	    
+
 	    setupComboBox();
 	    $(function() {
-		    $( "#combobox" ).combobox();		    
+		    $( "#combobox" ).combobox();
 		});
 	});
 }
-
+	
 function setupComboBox() {
     (function( $ ) {
 	$.widget( "ui.combobox", {
@@ -50,7 +50,7 @@ function setupComboBox() {
 			select = this.element.hide(),
 			selected = select.children( ":selected" ),
 			value = selected.val() ? selected.text() : "";
-		    var input = this.input = $( "<input class='search-box'>" )
+		    var input = this.input = $( "<input>" )
 			.insertAfter( select )
 			.val( value )
 			.autocomplete({
@@ -100,14 +100,14 @@ function setupComboBox() {
 				}
 			    })
 			.addClass( "ui-widget ui-widget-content ui-corner-left" );
- 
+
 		    input.data( "autocomplete" )._renderItem = function( ul, item ) {
 			return $( "<li></li>" )
 			.data( "item.autocomplete", item )
 			.append( "<a>" + item.label + "</a>" )
 			.appendTo( ul );
 		    };
- 
+
 		    this.button = $( "<button type='button'>&nbsp;</button>" )
 			.attr( "tabIndex", -1 )
 			.attr( "title", "Show All Items" )
@@ -126,13 +126,13 @@ function setupComboBox() {
 				    input.autocomplete( "close" );
 				    return;
 				}
- 
+
 				// pass empty string as value to search for, displaying all results
 				input.autocomplete( "search", "" );
 				input.focus();
 			    });
 		},
- 
+		    
 		    destroy: function() {
 		    this.input.remove();
 		    this.button.remove();

@@ -1,13 +1,13 @@
-** [X] Pagination for pajas points in user_page
-** [] Minimize amount of javascript lookups to FB
-** [X] Better handling of top list
-** [] Ajax handling of add point in user_page
-** [X] Confirmation dialog when deleting point
-** [X] Ability to edit existing pajas points
-** [] Add logging entries
-** [X] Fix so that you can only see a welcome message when logged out
-** [X] Find a better algorithm for the friend page
-   Fixed main problem by using task queues, need to solve so that an 
-   initial search for pajas friends is done   
-** [X] Facebook dialog for writing on a wall when adding a point
-   Fixed this by posting directly to the friends wall when adding the point
+* Things that must be changed before release
+** Change logo to something nicer
+** Align search friends so that it looks the same on all browsers
+** Fix so that there is a minimum size to the search combocox
+** Minimize amount of javascript lookups to FB
+   This will be done by storing more info about friends
+** Add more padding between things
+** Highlight nr 1 pajas in top list
+** Fix so that friend info is updated in a background process each time a user logs in
+** Add a settings section under the me tab
+*** Add a setting where a user can set if they want to post in FB each time they add a pajas point
+** Add logging entries
+

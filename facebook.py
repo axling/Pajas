@@ -32,7 +32,7 @@ usage of this module might look like this:
         friends = graph.get_connections("me", "friends")
 
 """
-
+import logging
 import cgi
 import hashlib
 import time
