@@ -8,25 +8,81 @@
 <table id="rounded-corner" summary="Pajas Top List">
   <thead>
     <tr>
-      <th class="rounded-head-left">Pajas</th>
+      <th class="rounded-head-left">Rank</th>
+      <th>Pajas</th>
       <th class="rounded-head-right">Total Points</th>
     </tr>
   </thead>
   <tfoot>
     <tr>
       <td class="rounded-foot-left"></td>
+      <td></td>
       <td class="rounded-foot-right"></td>
     </tr>
   </tfoot>
   <tbody>
     {% if summary %}
-    {% for uid, count, friend in summary %}
+    {% for uid, name, count, friend in summary %}
     <tr>
+      {% ifequal forloop.counter 1 %}
+      <td class="rank-column">
+	<span class="pajas-rank">
+	  <span class="underlined-the">The</span> Pajas!
+	</span>
+      </td>
+      {% endifequal%}
+      {% ifequal forloop.counter 2 %}
+      <td>
+	<span class="pajas-rank">Pajas Overlord</span>
+      </td>
+      {% endifequal%}
+      {% ifequal forloop.counter 3 %}
+      <td>
+	<span class="pajas-rank">Pajas Supreme</span>
+      </td>
+      {% endifequal%}
+      {% ifequal forloop.counter 4 %}
+      <td>
+	<span class="pajas-rank">Pajas Master</span>
+      </td>
+      {% endifequal%}
+      {% ifequal forloop.counter 5 %}
+      <td>
+	<span class="pajas-rank">Sir Pajas</span>
+      </td>
+      {% endifequal%}
+      {% ifequal forloop.counter 6 %}
+      <td>
+	<span class="pajas-rank">El Pajazzo</span>
+      </td>
+      {% endifequal%}
+      {% ifequal forloop.counter 7 %}
+      <td>
+	<span class="pajas-rank">Pajas Dude</span>
+      </td>
+      {% endifequal%}
+      {% ifequal forloop.counter 8 %}
+      <td>
+	<span class="pajas-rank">The Pajas of Canterbury</span>
+      </td>
+      {% endifequal%}
+      {% ifequal forloop.counter 9 %}
+      <td>
+	<span class="pajas-rank">Above Average Pajas</span>
+      </td>
+      {% endifequal%}
+      {% ifequal forloop.counter 10 %}
+      <td>
+	<span class="pajas-rank">Slightly Basic Pajas</span>
+      </td>
+      {% endifequal%}
       <td>
 	{% if friend %}
-	<div class="fb_uid" id="{{uid}}"></div>
+	<img src="http://graph.facebook.com/{{uid}}/picture" />
+	<a href="/user_page/{{uid}}/1">{{name}}</a>
 	{% else %}
-	<div class="fb_uid_no_link" id="{{uid}}"></div>
+	<img src="http://graph.facebook.com/{{uid}}/picture" />
+	<span>{{name}}</span>
 	{% endif%}
       </td>
       <td>{{count}}</td>

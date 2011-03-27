@@ -80,7 +80,7 @@ class Point(db.Model):
     pajas_id = db.StringProperty(required=True)
     description = db.StringProperty(required=True)
     submit_time = db.DateTimeProperty(auto_now_add=True)
-    
+
 class FacebookApiError(Exception):
     def __init__(self, result):
         self.result = result
@@ -254,7 +254,7 @@ class BaseHandler(webapp.RequestHandler):
             # actually being a GET. in webapp causes loss of request.POST data.
             if facebook.access_token and facebook.user_id:
                 taskqueue.add(url="/update_friend_info",
-                              params={"user": facebook.user_id, 
+                              params={"user": facebook.user_id,
                                       "access_token": facebook.access_token}, method='GET')
             self.request.method = u'GET'
             self.set_cookie(
@@ -279,7 +279,7 @@ class BaseHandler(webapp.RequestHandler):
             if not user and facebook.access_token:
                 me = facebook.api(u'/me', {u'fields': u'name,picture,friends'})
                 try:
-                    
+
                     friends = [user[u'id'] for user in me[u'friends'][u'data']]
                     friend_names = [user[u'name'] for user in
                                     me[u'friends'][u'data']]
@@ -300,7 +300,7 @@ class BaseHandler(webapp.RequestHandler):
                     # ignore if can't get the minimum fields
                     logging.error("Can't get minimum amount of fields when initializing facebook")
                     raise
-                    
+
         self.facebook = facebook
         self.user = user
 
@@ -349,8 +349,12 @@ class UserPage(BaseHandler):
                                                   uid).order("-submit_time")
                 compiled_points=[]
                 for point in rec_points_q:
-                    index = self.user.friends.index(point.issuer_id)
-                    compiled_points.append((self.user.friend_names[index], point))
+                    if point.issuer_id == self.user.user_id:
+                        name = self.user.name
+                    else:
+                        index = self.user.friends.index(point.issuer_id)
+                        name = self.user.friend_names[index]
+                    compiled_points.append((name, point))
                 paginator = Paginator(compiled_points, 5)
                 try:
                     rec_points = paginator.page(page)
@@ -387,19 +391,30 @@ class UserPage(BaseHandler):
                 self.redirect(u'/user_page/' + uid + u'/' + str(page))
             else:
                 description = self.request.POST[u'description']
+                try:
+                    post_on_fb = self.request.POST[u'facebook_post']
+                except KeyError:
+                    post_on_fb = None
                 point = Point(issuer_id = self.user.user_id, pajas_id = uid,
                               description = description)
                 point.put()
                 
-                graph = facebook.GraphAPI(self.user.access_token)
-                friend_index = self.user.friends.index(uid)
-                friend_name = self.user.friend_names[friend_index]
-                message = "Pajas! you have received a pajas point by " + self.user.name + " with the reason: " + description
-                post_dict = {"name": "Pajas Points for " + friend_name ,
-                             "link": 
-                             "http://apps.facebook.com/pajaspoint/user_page/" + uid}
-                graph.put_wall_post(profile_id=uid, message=message,
-                                 attachment=post_dict)
+                if post_on_fb=="postit":
+                    graph = facebook.GraphAPI(self.user.access_token)
+                    if uid != self.user.user_id:
+                        friend_index = self.user.friends.index(uid)
+                        friend_name = self.user.friend_names[friend_index]
+                        message = "Pajas! you have received a pajas point from " + self.user.name + " with the reason: " + description
+                        post_dict = {"name": "Pajas Points for " + friend_name ,
+                                     "link":
+                                         "http://apps.facebook.com/pajaspoint/user_page/" + uid + "/1"}
+                    else:
+                        message = "Pajas! you have given yourself a pajas point with the reason: " + description
+                        post_dict = {"name": "Pajas Points for " + self.user.name ,
+                                     "link":
+                                         "http://apps.facebook.com/pajaspoint/user_page/" + uid + "/1"}
+                    graph.put_wall_post(profile_id=uid, message=message,
+                                        attachment=post_dict)
                 if (not (uid in self.user.pajas_friends)) and (uid != self.user.user_id):
                     self.user.pajas_friends.append(uid)
                     self.user.put()
@@ -436,12 +451,12 @@ class FriendListHandler(BaseHandler):
                         count += 1
                 if count > 0:
                     i = self.user.friends.index(friend)
-                    try: 
+                    try:
                         name = self.user.friend_names[i]
                     except IndexError, ex:
                         logging.error("Exception when getting name: " + str(ex))
                         name= ""
-                    pajas_friends.append((friend, name, temp_point, 
+                    pajas_friends.append((friend, name, temp_point,
                                               count))
 
             if pajas_friends:
@@ -465,15 +480,33 @@ class ListPointsHandler(BaseHandler):
                         summary[point.pajas_id] = 1
                 summary = sorted(summary.iteritems(), key=itemgetter(1),
                                  reverse=True)
-                memcache.set("pajas_top_list", summary, 3600)
+                memcache.set("pajas_top_list", summary[0:9], 3600)
                 cachedsummary=summary[0:9]
             friendcachedsummary = []
             for uid, score in cachedsummary:
                 if uid in self.user.friends or uid == self.user.user_id:
-                    friendcachedsummary.append((uid, score, True))
+                    if uid != self.user.user_id:
+                        index = self.user.friends.index(uid)
+                        name = self.user.friend_names[index]
+                    else:
+                        name = self.user.name
+                    friendcachedsummary.append((uid, name, score, True))
                 else:
-                    friendcachedsummary.append((uid, score, False))
-                    
+                    name = memcache.get(uid + "_name")
+                    if name is None:
+                        user = User.get_by_key_name(uid)
+                        if user:
+                            name = user.name
+                        else:
+                            graph = facebook.GraphAPI(self.user.access_token)
+                            person = graph.get_object("/" + uid)
+                            name = person[u'name']
+                        if not memcache.add(uid + "_name", name):
+                            logging.error("Couldn't add name " + name +
+                                          " for uid " + uid + " in memcache")
+
+                    friendcachedsummary.append((uid, name, score, False))
+
             self.render(u'list_points', summary=friendcachedsummary)
         else:
             self.redirect(u'/')
@@ -529,7 +562,7 @@ class UpdateTopList(BaseHandler):
         summary = sorted(summary.iteritems(), key=itemgetter(1),
                          reverse=True)
         memcache.set("pajas_top_list", summary[0:9], 3600)
-        
+
 class UpdateFriendInfo(BaseHandler):
     def get(self):
         user = self.request.get('user')
@@ -544,7 +577,12 @@ class UpdateFriendInfo(BaseHandler):
         pajas.friends = friends_uids
         pajas.name = me[u'name']
         pajas.put()
-        
+        friendlist = zip(friend_uids, friend_names)
+        if not memcache.add("friendlist_" + user,
+                            friendlist, time=7200):
+                    logging.error("Memcache add failed for key: friendlist_"
+                                  + user)
+
 class RedirectFriend(BaseHandler):
     def post(self):
         friend = self.request.POST[u'friend']

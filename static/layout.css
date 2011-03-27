@@ -207,6 +207,30 @@ body {
     margin-top: 40px;
 }
 
+.pajas-rank {
+    font-family: serif;
+    font-style: normal;
+    font-variant: normal;
+    font-weight: normal;
+    font-size: medium;
+    line-height: 100%;
+    word-spacing: normal;
+    letter-spacing: 0.3ex;
+    text-decoration: none;
+    text-transform: none;
+    text-align: left;
+    text-indent: 0ex;
+    margin-top: 40px;
+    width: 120px;
+}
+.pajas-rank .underlined-the {
+    text-decoration: underline;
+}
+
+.rank-column {
+    min-width: 120px;
+} 
+
 #login-flow {
     margin-top: 10px;
 }
