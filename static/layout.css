@@ -123,6 +123,14 @@ height: 0;
 {
 	background: #e8edff url('/images/botright.png') right bottom no-repeat;
 }
+#rounded-corner tfoot th.rounded-foot-left
+{
+	background: #b9c9fe url('/images/botleft-th.png') left bottom no-repeat;
+}
+#rounded-corner tfoot th.rounded-foot-right
+{
+	background: #b9c9fe url('/images/botright-th.png') right bottom no-repeat;
+}
 #rounded-corner tbody tr:hover td
 {
 	background: #d0dafd;
@@ -237,4 +245,9 @@ body {
 
 .logo-link{
     border:none;
+}
+
+.search-text {
+    font-family: serif;
+    font-style: italic;
 }

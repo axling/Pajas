@@ -49,13 +49,13 @@ function setupComboBox() {
 		    var self = this,
 			select = this.element.hide(),
 			selected = select.children( ":selected" ),
-			value = selected.val() ? selected.text() : "";
+			value = "Search friends here...";
 		    var input = this.input = $( "<input>" )
 			.insertAfter( select )
 			.val( value )
 			.autocomplete({
 				delay: 0,
-				minLength: 0,
+				minLength: 0,				
 				source: function( request, response ) {
 				    var matcher = new RegExp( $.ui.autocomplete.escapeRegex(request.term), "i" );
 				    response( select.children( "option" ).map(function() {
@@ -99,7 +99,11 @@ function setupComboBox() {
 				    }
 				}
 			    })
-			.addClass( "ui-widget ui-widget-content ui-corner-left" );
+			.addClass( "ui-widget ui-widget-content ui-corner-left search-text" )
+			.focus(function () {
+				$(this).val("")
+				$(this).removeClass("search-text")
+			    });
 
 		    input.data( "autocomplete" )._renderItem = function( ul, item ) {
 			return $( "<li></li>" )

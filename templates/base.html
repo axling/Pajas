@@ -19,6 +19,20 @@
     <script src="/fb_scripts.js"></script>
     {% block scripts %}{% endblock %}
     <style> 
+      .ui-autocomplete {
+      max-height: 250px;
+      overflow-y: auto;
+      /* prevent horizontal scrollbar */
+      overflow-x: hidden;
+      /* add padding to account for vertical scrollbar */
+      padding-right: 20px;
+      }
+      /* IE 6 doesn't support max-height
+      * we use height instead, but this forces the menu to always be this tall
+      */
+      * html .ui-autocomplete {
+      height: 250px;
+      }
       .ui-button { margin-left: -1px;}
       .ui-button-icon-only .ui-button-text { padding: 0.35em; } 
       .ui-autocomplete-input { margin: 0; padding: 0.48em 0 0.47em 0.45em; }
@@ -39,7 +53,6 @@
 	      Me</a></li>
 	  <li class="search-bar"><form method="post" action="/redirect_friend">
 	      Search Friends:<select id="combobox" name="friend">
-		<option value="none"></option>
 		{% for friend, name in friendlist %}
 		<option value="{{ friend }}">{{ name }}</option>
 		{% endfor%}
@@ -65,7 +78,7 @@
       </div>
       <div id="footer"></div>
     </div>
-    <script src="/main.js"></script>
+    <script src="/main.js"></script>    
     <div id="fb-root"></div>
     <script>
       {# async loading of facebook js sdk #}
@@ -76,5 +89,6 @@
         document.getElementById('fb-root').appendChild(e);
       }());
     </script>
+    <fb:google-analytics uacct="UA-20409533-2" />
   </body>
 </html>
