@@ -251,3 +251,29 @@ body {
     font-family: serif;
     font-style: italic;
 }
+
+.instruction-text {
+    font-family: serif;
+    font-style: italic;
+    font-size: small;
+}
+
+.message-text {
+    font-family: serif;
+    font-style: italic;
+    font-variant: normal;
+    font-weight: normal;
+    font-size: small;
+    line-height: 100%;
+    word-spacing: normal;
+    letter-spacing: 0.3ex;
+    text-decoration: none;
+    text-transform: none;
+    text-align: left;
+    text-indent: 0ex;
+    color: red;
+}
+
+.textarea-error {
+    background-color:red;
+}

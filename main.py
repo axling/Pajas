@@ -67,6 +67,26 @@ def get_picture(dic, index):
     """Django template filter to render picture"""
     return dic[index].picture
 
+def get_cached_name(uid, access_token):
+        cached_name = memcache.get(uid + "_name")
+        if not cached_name:
+            graph = facebook.GraphAPI(access_token)
+            try:
+                person = graph.get_object("/" + uid)
+                graphname = person[u'name']
+                if not memcache.set(uid + "_name", graphname):
+                    logging.error("Couldn't add name " + graphname +
+                                  " for uid " + uid + " in memcache")
+                    cached_name = graphname
+            except GraphAPIError, inst:
+                logging.error("Error when trying to get " + uid + " in facebook: "  + str(inst))
+                cached_name = ""
+            except ValueError, ex:
+                logging.error("Error when trying to get facebook object for " + uid + " with reason:" + str(ex))
+                cached_name = ""
+        return cached_name
+
+
 class User(db.Model):
     user_id = db.StringProperty(required=True)
     access_token = db.StringProperty(required=True)
@@ -286,7 +306,7 @@ class BaseHandler(webapp.RequestHandler):
                     friends = [user[u'id'] for user in me[u'friends'][u'data']]
                     friend_names = [user[u'name'] for user in
                                     me[u'friends'][u'data']]
-                    
+
                     if not memcache.set("friendlist_" + facebook.user_id,
                                         zip(friends,friend_names), time=7200):
                         logging.error("Memcache add failed for key: friendlist_"
@@ -361,7 +381,7 @@ class UserPage(BaseHandler):
                             name = self.user.friend_names[index]
                         except ValueError, ex:
                             logging.error("Error when retreiving name, probably the friend info has failed to have been updated: " + str(ex))
-                            name = "Name not known"                            
+                            name = get_cached_name(point.issuer_id, self.user.access_token) 
                     compiled_points.append((name, point))
                 paginator = Paginator(compiled_points, 5)
                 try:
@@ -374,7 +394,7 @@ class UserPage(BaseHandler):
                         name = self.user.friend_names[index]
                     except ValueError, ex:
                         logging.error("Error when retreiving name, probably the friend info has failed to have been updated: " + str(ex))
-                        name="Name not known"
+                        name = get_cached_name(uid, self.user.access_token) 
                 else:
                     name = self.user.name
                 self.render(u'user_page', points = rec_points,
@@ -383,6 +403,7 @@ class UserPage(BaseHandler):
                 self.redirect(u"/")
         else:
             self.redirect(u"/")
+
     def post(self, uid, page):
         try:
             page = int(page)
@@ -410,7 +431,7 @@ class UserPage(BaseHandler):
                 point = Point(issuer_id = self.user.user_id, pajas_id = uid,
                               description = description)
                 point.put()
-                
+
                 if post_on_fb=="postit":
                     graph = facebook.GraphAPI(self.user.access_token)
                     if uid != self.user.user_id:
@@ -419,18 +440,20 @@ class UserPage(BaseHandler):
                             friend_name = self.user.friend_names[friend_index]
                         except ValueError, ex:
                             logging.error("Error when retreiving name, probably the friend info has failed to have been updated: " + str(ex))
-                            friend_name = ""
+                            friend_name = get_cached_name(uid, self.user.acess_token)
                         message = "Pajas! you have received a pajas point from " + self.user.name + " with the reason: " + description
-                        post_dict = {"name": "Pajas Points for " + friend_name ,
+                        post_dict = {"name": "Pajas Points for " + friend_name.encode('utf-8') ,
                                      "link":
                                          "http://apps.facebook.com/pajaspoint/user_page/" + uid + "/1"}
                     else:
                         message = "Pajas! you have given yourself a pajas point with the reason: " + description
-                        post_dict = {"name": "Pajas Points for " + self.user.name ,
+                        post_dict = {"name": "Pajas Points for " + self.user.name.encode('utf-8') ,
                                      "link":
                                          "http://apps.facebook.com/pajaspoint/user_page/" + uid + "/1"}
                     try :
-                        graph.put_wall_post(profile_id=uid, message=message,
+                        logging.info("message = " + message)
+                        mess = message.encode('utf-8')
+                        graph.put_wall_post(profile_id=uid, message=mess,
                                             attachment=post_dict)
                     except GraphAPIError, inst:
                         logging.error("Error when trying to post facebook message for uid " + uid + ": "  + str(inst))
@@ -478,14 +501,14 @@ class FriendListHandler(BaseHandler):
                         count += 1
                 if count > 0:
                     try:
-                        i = self.user.friends.index(friend)                    
+                        i = self.user.friends.index(friend)
                         name = self.user.friend_names[i]
                     except IndexError, ex:
                         logging.error("Exception when getting name: " + str(ex))
                         name= ""
                     except ValueError, ex:
                         logging.error("Error when retreiving name, probably the friend info has failed to have been updated: " + str(ex))
-                        name = ""
+                        name = get_cached_name(friend, self.user.access_token)
                     pajas_friends.append((friend, name, temp_point,
                                               count))
 
@@ -521,7 +544,7 @@ class ListPointsHandler(BaseHandler):
                             name = self.user.friend_names[index]
                         except ValueError, ex:
                             logging.error("Error when retreiving name, probably the friend info has failed to have been updated: " + str(ex))
-                            name = ""
+                            name = get_cached_name(uid, self.user.access_token)
                     else:
                         name = self.user.name
                     friendcachedsummary.append((uid, name, score, True))
@@ -543,7 +566,7 @@ class ListPointsHandler(BaseHandler):
                                 logging.error("Error when trying to get " + uid + " in facebook: "  + str(inst))
                             except ValueError, ex:
                                 logging.error("Error when trying to get facebook object for " + uid + " with reason:" + str(ex))
-                                                        
+
                     friendcachedsummary.append((uid, name, score, False))
 
             self.render(u'list_points', summary=friendcachedsummary)
@@ -571,7 +594,7 @@ class UpdateMyFriends(BaseHandler):
                     if Point.all().filter("pajas_id =", friend).count(1) > 0:
                         user.pajas_friends.append(friend)
                         user.put()
-            if not memcache.set(key, "dont_update", 3600):
+            if not memcache.set(key, "dont_update", 1800):
                 logging.error("Memcache set failed")
 
 
@@ -624,8 +647,8 @@ class UpdateFriendInfo(BaseHandler):
             logging.error("Error when trying to get facebook object /me: "  + str(inst))
         except ValueError, ex:
             logging.error("Error when trying to get facebook object for /me with reason:" + str(ex))
-            
-            
+
+
 class RedirectFriend(BaseHandler):
     def post(self):
         friend = self.request.POST[u'friend']

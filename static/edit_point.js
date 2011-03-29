@@ -15,4 +15,26 @@ $(document).ready(function() {
 			point +"'><input type='submit' " +
 			"value='Edit Pajas Point' /></form></td>");
 	    });
+	$('#description').focus(function() {
+		$(this).removeClass('instruction-text');
+		$(this).removeClass('textarea-error');
+		$(this).val("");
+	    });
+	$('#add_point').submit(function() {
+		if($('#description').hasClass('instruction-text') | $('#description').hasClass('textarea-error')) {
+		    $('#message').html("Error:You must enter something yourself as a reason for the Pajas Point.");
+		    $('#description').addClass('textarea-error');
+		    $('#description').val("");
+		    return false;
+		} else {
+		    if($('#description').val().length > 0) {
+			return true;
+		    } else {
+			$('#message').html("Error: You must enter something as a reason for the Pajas Point.");
+			$('#description').addClass('textarea-error');
+			$('#description').val("");
+			return false;
+		    }
+		}
+	    });
     });

@@ -6,6 +6,7 @@
 {% endblock %}
 
 {% block body %}
+<div class="message-text" id="message"></div>
 <h3 class="page-header">Pajas points for {{user_name}}</h3>
 <table id="rounded-corner" summary="Your Pajaspoints">
   <thead>
@@ -22,9 +23,9 @@
       <form id="add_point" method="post" 
 	    action="/user_page/{{user}}/{{points.number}}">
 	<th>
-	  <textarea rows="2" cols="30" name="description"></textarea>
+	  <textarea class="instruction-text" rows="2" cols="30" id="description" name="description">Write the reason for the pajas point here. This cannot be empty</textarea>
 	</th>
-	<th><input type="checkbox" name="facebook_post" value="postit" checked />Post Point on Facebook</th>
+	<th><input type="checkbox" id="facebook_post" name="facebook_post" value="postit" checked />Post Point on Facebook</th>
 	<th colspan="2">
 	  <input type="submit" id="point_submit" value="Add Pajas Point" />
 	  <input type="hidden" name="_csrf_token" value="{{ csrf_token }}" />
