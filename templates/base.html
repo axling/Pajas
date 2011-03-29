@@ -88,7 +88,18 @@
         e.src = document.location.protocol + '//connect.facebook.net/en_US/all.js';
         document.getElementById('fb-root').appendChild(e);
       }());
+      
+      {# async loading of google analytics #}
+      var _gaq = _gaq || [];
+      _gaq.push(['_setAccount', 'UA-20409533-2']);
+      _gaq.push(['_trackPageview']);
+
+      (function() {
+        var ga = document.createElement('script');
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0];
+        s.parentNode.insertBefore(ga, s);
+      })();
     </script>
-    <fb:google-analytics uacct="UA-20409533-2" />
   </body>
 </html>

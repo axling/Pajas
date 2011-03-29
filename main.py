@@ -38,7 +38,7 @@ from operator import itemgetter
 import Cookie
 import base64
 import cgi
-import debug_conf as conf
+import conf
 import datetime
 import hashlib
 import hmac
