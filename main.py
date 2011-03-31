@@ -38,7 +38,7 @@ from operator import itemgetter
 import Cookie
 import base64
 import cgi
-import conf
+import debug_conf as conf
 import datetime
 import hashlib
 import hmac
@@ -248,7 +248,9 @@ class BaseHandler(webapp.RequestHandler):
         if self.user:
             friendlist = memcache.get("friendlist_" + self.user.user_id)
             if friendlist is None:
-                friendlist = zip(self.user.friends, self.user.friend_names)
+                friendlist = sorted(zip(self.user.friends, 
+                                        self.user.friend_names),
+                                    key = lambda k: k[1])
                 if not memcache.set("friendlist_" + self.user.user_id,
                                     friendlist, time=7200):
                     logging.error("Memcache add failed for key: friendlist_"
@@ -306,9 +308,10 @@ class BaseHandler(webapp.RequestHandler):
                     friends = [user[u'id'] for user in me[u'friends'][u'data']]
                     friend_names = [user[u'name'] for user in
                                     me[u'friends'][u'data']]
-
+                    friendlist = sorted(zip(friends,friend_names), 
+                                        key = lambda k: k[1])
                     if not memcache.set("friendlist_" + facebook.user_id,
-                                        zip(friends,friend_names), time=7200):
+                                        friendlist, time=7200):
                         logging.error("Memcache add failed for key: friendlist_"
                                       + facebook.user_id)
                     user = User(key_name=facebook.user_id,
@@ -640,7 +643,8 @@ class UpdateFriendInfo(BaseHandler):
             pajas.friends = friends_uids
             pajas.name = me[u'name']
             pajas.put()
-            friendlist = zip(friends_uids, friend_names)
+            friendlist = sorted(zip(friends_uids, friend_names), 
+                                key = lambda k: k[1])
             if not memcache.set("friendlist_" + user, friendlist, time=7200):
                 logging.error("Memcache add failed for key: friendlist_" + user + ", friendlist: " + str(friendlist))
         except GraphAPIError, inst:
