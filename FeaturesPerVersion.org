@@ -4,10 +4,10 @@
 ** DONE Fix so that there is a minimum size to the search combocox
 ** DONE Minimize amount of javascript lookups to FB
    This will be done by storing more info about friends
-** TODO Add more padding between things
+** DONE Add more padding between things
 ** DONE Highlight nr 1 pajas in top list
 ** DONE Fix so that friend info is updated in a background process each time a user logs in
 ** DONE Add a settings section under the me tab
 *** Add a setting where a user can set if they want to post in FB each time they add a pajas point
-** Add logging entries
+** DONE Add logging entries
 

@@ -16,13 +16,15 @@ $(document).ready(function() {
 			"value='Edit Pajas Point' /></form></td>");
 	    });
 	$('#description').focus(function() {
-		$(this).removeClass('instruction-text');
-		$(this).removeClass('textarea-error');
-		$(this).val("");
+		if($('#description').hasClass('instruction-text') | $('#description').hasClass('textarea-error')) {
+		    $(this).removeClass('instruction-text');
+		    $(this).removeClass('textarea-error');
+		    $(this).val("");
+		}
 	    });
 	$('#add_point').submit(function() {
 		if($('#description').hasClass('instruction-text') | $('#description').hasClass('textarea-error')) {
-		    $('#message').html("Error:You must enter something yourself as a reason for the Pajas Point.");
+		    $('#message').html("Error: You must enter something yourself as a reason for the Pajas Point.");
 		    $('#description').addClass('textarea-error');
 		    $('#description').val("");
 		    return false;
