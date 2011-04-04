@@ -32,6 +32,7 @@ usage of this module might look like this:
         friends = graph.get_connections("me", "friends")
 
 """
+from google.appengine.api import urlfetch
 import logging
 import cgi
 import hashlib
@@ -161,29 +162,34 @@ class GraphAPI(object):
         We translate args to a valid query string. If post_args is given,
         we send a POST request to the given path with the given arguments.
         """
+        method = urlfetch.GET
         if not args: args = {}
         if self.access_token:
             if post_args is not None:
                 post_args["access_token"] = self.access_token
+                method = urlfetch.POST                
             else:
                 args["access_token"] = self.access_token
         post_data = None if post_args is None else urllib.urlencode(post_args)
-        file = urllib2.urlopen("https://graph.facebook.com/" + path + "?" +
-                              urllib.urlencode(args), post_data)
-        try:
-            response = _parse_json(file.read())
-        finally:
-            file.close()
-        if response.get("error"):
-            raise GraphAPIError(response["error"]["type"],
-                                response["error"]["message"])
-        return response
-
+        response = urlfetch.fetch(url ="https://graph.facebook.com/" + path + "?" +
+                                  urllib.urlencode(args), 
+                                  method = method,
+                                  headers = {'Content-Type': 
+                                             'application/x-www-form-urlencoded'}, 
+                                  payload = post_data,
+                                  allow_truncated = True,
+                                  deadline=10)
+        if response.status_code != 200:
+            raise GraphAPIError(response.status_code,
+                                response.content)
+        else: 
+            response = _parse_json(response.content)
+            return response
 
 class GraphAPIError(Exception):
-    def __init__(self, type, message):
+    def __init__(self, status_code, message):
         Exception.__init__(self, message)
-        self.type = type
+        self.type = status_code
 
 
 def get_user_from_cookie(cookies, app_id, app_secret):

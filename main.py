@@ -38,7 +38,7 @@ from operator import itemgetter
 import Cookie
 import base64
 import cgi
-import debug_conf as conf
+import conf
 import datetime
 import hashlib
 import hmac
@@ -454,7 +454,6 @@ class UserPage(BaseHandler):
                                      "link":
                                          "http://apps.facebook.com/pajaspoint/user_page/" + uid + "/1"}
                     try :
-                        logging.info("message = " + message)
                         mess = message.encode('utf-8')
                         graph.put_wall_post(profile_id=uid, message=mess,
                                             attachment=post_dict)
