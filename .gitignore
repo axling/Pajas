@@ -1,0 +1,8 @@
+# ignore all emacs save buffers
+*~
+# ignore all compiled python files
+*.pyc
+start_pajas
+debug_conf.py
+*.xcf
+*#*#
