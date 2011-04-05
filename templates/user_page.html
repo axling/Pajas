@@ -6,8 +6,7 @@
 {% endblock %}
 
 {% block body %}
-<div class="message-text" id="message"></div>
-<h3 class="page-header">Pajas points for {{user_name}}</h3>
+<h3 class="page-header">Pajas Points for {{user_name}}</h3>
 <table id="rounded-corner" summary="Your Pajaspoints">
   <thead>
     <tr>
@@ -17,13 +16,13 @@
   </thead>
   <tfoot>
     <tr>
-      <th colspan="4">Add Pajaspoint for {{user_name}}</th>
+      <th colspan="4">Add Pajas Point for {{user_name}}</th>
     </tr>
     <tr>
       <form id="add_point" method="post" 
 	    action="/user_page/{{user}}/{{points.number}}">
 	<th>
-	  <textarea class="instruction-text" rows="2" cols="30" id="description" name="description">Write the reason for the pajas point here. This cannot be empty.</textarea>
+	  <textarea class="instruction-text" rows="2" cols="30" id="description" name="description">Write the reason for the pajas point here.</textarea>
 	</th>
 	<th><input type="checkbox" id="facebook_post" name="facebook_post" value="postit" checked />Post Point on Facebook</th>
 	<th colspan="2">
@@ -109,11 +108,19 @@
       {% endifequal %}  
     </tr>
     {% empty %}
+    {% ifequal user logged_in_user.user_id %}
     <tr>
-      <td colspan="4">No pajaspoints exists for {{user_name}}
+      <td colspan="4">No pajas points exists for yourself. You can give yourself a pajas point if you think that you are worthy of a point. 
       </td>
     </tr>
+    {% else %}
+    <tr>
+      <td colspan="4">No pajas points exists for {{user_name}}. You can change that right now by adding a point on your friend.
+      </td>
+    </tr>
+    {% endifequal %}    
     {% endfor %}
   </tbody>
 </table>
+<div class="message-text" id="message"></div>
 {% endblock %}

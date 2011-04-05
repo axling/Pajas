@@ -19,6 +19,7 @@ $(document).ready(function() {
 		if($('#description').hasClass('instruction-text') | $('#description').hasClass('textarea-error')) {
 		    $(this).removeClass('instruction-text');
 		    $(this).removeClass('textarea-error');
+		    $(this).removeAttr('class');
 		    $(this).val("");
 		}
 	    });

@@ -4,8 +4,8 @@
 {% endblock %}
 
 {% block body %}
-<h3 class="page-header">Your Friends Pajaspoints</h3>
-<table id="rounded-corner" summary="Your Friend's Pajaspoints">
+<h3 class="page-header">Your Friends Pajas Points</h3>
+<table id="rounded-corner" summary="Your Friend's Pajas Points">
   <thead>
     <tr>
       <th class="rounded-head-left">Friend</th>
@@ -27,6 +27,11 @@
       <td><span class="description">{{ last_point.description }}
       </span></td>
       <td>{{ nr_points }}</td>
+    </tr>
+    {% empty %}
+    <tr>
+      <td colspan="3">You don't have any friends with pajas points! But you can change that by searching for a friend in the search bar named 'Search Friends'.<br /><br /> Select a friend, press enter to go to your friends pajas points. When there you can add a point for that friend.
+      </td>
     </tr>
     {% endfor %}
   </tbody>
