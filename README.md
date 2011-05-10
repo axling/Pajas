@@ -7,10 +7,10 @@ The app is based on an example app that Facebook has that is called [Run with Fr
 
 For security reasons I haven't included the file conf.py which contains the API secret codes that you need for the Facebook interaction. Create the file and add the following(and replacing the stuff inside <> of course):
 
-> # Facebook Application ID and Secret.
-> FACEBOOK_APP_ID = '<Facebook App Id>'
-> FACEBOOK_APP_SECRET = 'Facebook App Secret'
-> # Canvas Page name.
-> FACEBOOK_CANVAS_NAME = 'Facebook App Name'
+    # Facebook Application ID and Secret.
+    FACEBOOK_APP_ID = '<Facebook App Id>'
+    FACEBOOK_APP_SECRET = 'Facebook App Secret'
+    # Canvas Page name.
+    FACEBOOK_CANVAS_NAME = 'Facebook App Name'
 
 
