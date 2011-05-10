@@ -9,8 +9,8 @@ For security reasons I haven't included the file conf.py which contains the API 
 
     # Facebook Application ID and Secret.
     FACEBOOK_APP_ID = '<Facebook App Id>'
-    FACEBOOK_APP_SECRET = 'Facebook App Secret'
+    FACEBOOK_APP_SECRET = '<Facebook App Secret>'
     # Canvas Page name.
-    FACEBOOK_CANVAS_NAME = 'Facebook App Name'
+    FACEBOOK_CANVAS_NAME = '<Facebook App Name>'
 
 
