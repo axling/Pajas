@@ -1,0 +1,11 @@
+* Features to implement in Version 2.0
+** High priority
+*** TODO Change so that all Pajas points are created from one dialog box
+*** TODO Make Pajas! to a facebook connect app
+*** TODO Use a new graphical design
+
+** Low priority  
+*** TODO The main URL will be pajas.nu
+*** TODO Change to swedish
+*** TODO Introduce a ranking and voting system for the pajas points
+*** TODO Make it so that there are one page for each pajas point
