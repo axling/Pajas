@@ -171,6 +171,7 @@ class GraphAPI(object):
             else:
                 args["access_token"] = self.access_token
         post_data = None if post_args is None else urllib.urlencode(post_args)
+        # Following is changed by Erik Axling
         response = urlfetch.fetch(url ="https://graph.facebook.com/" + path + "?" +
                                   urllib.urlencode(args), 
                                   method = method,
